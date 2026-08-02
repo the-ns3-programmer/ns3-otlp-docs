@@ -1,0 +1,15 @@
+# MkDocs build directory & cache
+site/
+.cache/
+
+# Virtual environments
+venv/
+mkdocs-env/
+.venv/
+__pycache__/
+*.pyc
+
+# Operating system & temporary files
+.DS_Store
+*.tmp
+*.log

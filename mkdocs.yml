@@ -1,0 +1,68 @@
+site_name: ns3-otlp Documentation
+site_description: Native OpenTelemetry Exporter Module for Network Simulator 3
+repo_url: https://github.com/the-ns3-programmer/otlp
+repo_name: otlp
+edit_uri: edit/main/docs/
+
+extra_css:
+  - extra.css
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: orange
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.footer
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/the-ns3-programmer/otlp
+    - icon: fontawesome/solid/paper-plane
+      link: mailto:arunsanthosh.rashok@gmail.com
+
+copyright: Copyright &copy; 2026 - the-ns3-programmer❤️
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Architecture Overview: 01_architecture_overview.md
+  - Prerequisites & Setup: 02_prerequisites_and_setup.md
+  - Components:
+      - OtelClock (Virtual Time): 03_otel_clock.md
+      - OtelTraceSink (Span Exporter): 04_otel_trace_sink.md
+      - OtelMetricSink (Metrics): 05_otel_metric_sink.md
+      - OtelHelper (Pipeline): 06_otel_helper.md
+  - Tutorials & Examples: 07_tutorials_and_examples.md
+  - Observability Dashboards: 08_observability_dashboards.md
+  - Automated Unit Testing: 09_unit_testing.md
+  - Troubleshooting & FAQ: 10_troubleshooting_faq.md
