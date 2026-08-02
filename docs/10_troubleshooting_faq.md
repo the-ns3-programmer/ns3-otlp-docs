@@ -33,6 +33,6 @@ This page addresses common compilation, linking, and runtime issues.
   title = {ns3-otlp: Native OpenTelemetry Exporter Module for Network Simulator 3},
   year = {2026},
   version = {1.0.0},
-  url = {https://github.com/the-ns3-programmer/otlp}
+  url = {https://github.com/the-ns3-programmer/ns3-otlp}
 }
 ```

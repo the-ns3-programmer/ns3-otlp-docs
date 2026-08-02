@@ -1,7 +1,7 @@
 site_name: ns3-otlp Documentation
 site_description: Native OpenTelemetry Exporter Module for Network Simulator 3
-repo_url: https://github.com/the-ns3-programmer/otlp
-repo_name: otlp
+repo_url: https://github.com/the-ns3-programmer/ns3-otlp
+repo_name: ns3-otlp
 edit_uri: edit/main/docs/
 
 extra_css:
@@ -41,7 +41,7 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/the-ns3-programmer/otlp
+      link: https://github.com/the-ns3-programmer/ns3-otlp
     - icon: fontawesome/solid/paper-plane
       link: mailto:arunsanthosh.rashok@gmail.com
 
