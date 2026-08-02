@@ -1,4 +1,4 @@
-site_name: ns3-otlp Documentation
+site_name: ns-3 otlp
 site_description: Native OpenTelemetry Exporter Module for Network Simulator 3
 repo_url: https://github.com/the-ns3-programmer/ns3-otlp
 repo_name: ns3-otlp
