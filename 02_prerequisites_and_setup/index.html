@@ -419,10 +419,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#verification" class="md-nav__link">
+  <a href="#graceful-fallback-verification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verification
+        Graceful Fallback Verification
       
     </span>
   </a>
@@ -793,10 +793,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#verification" class="md-nav__link">
+  <a href="#graceful-fallback-verification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verification
+        Graceful Fallback Verification
       
     </span>
   </a>
@@ -829,7 +829,7 @@
 
 
 <h1 id="02-prerequisites-environment-setup">02. Prerequisites &amp; Environment Setup<a class="headerlink" href="#02-prerequisites-environment-setup" title="Permanent link">&para;</a></h1>
-<p>This guide details the complete prerequisite stack, system dependencies, library setup, and CMake build configuration required to build <code>ns3-otlp</code> on Linux.</p>
+<p>This guide details the system prerequisites, library setup, and CMake build configuration required to build <code>ns3-otlp</code> on Linux.</p>
 <hr />
 <h2 id="1-system-requirements">1. System Requirements<a class="headerlink" href="#1-system-requirements" title="Permanent link">&para;</a></h2>
 <ul>
@@ -837,31 +837,27 @@
 <li><strong>C++ Compiler:</strong> GCC 11+ or Clang 13+ with C++17/C++20/C++23 support</li>
 <li><strong>Build System:</strong> CMake 3.22+ and Ninja build</li>
 <li><strong>ns-3 Version:</strong> ns-3.36 or newer (tested on ns-3.46.1)</li>
+<li><strong>Containers:</strong> Docker (for running Jaeger UI container)</li>
 </ul>
 <hr />
 <h2 id="2-installing-system-packages">2. Installing System Packages<a class="headerlink" href="#2-installing-system-packages" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>build-essential<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>g++<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>gdb<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>cmake<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>ninja-build<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>pkg-config<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>git<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>python3<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>python3-pip<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>ccache<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>libcurl4-openssl-dev<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>libssl-dev<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>zlib1g-dev<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>protobuf-compiler<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>libprotobuf-dev<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>libgrpc++-dev<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>protobuf-compiler-grpc
+<span class="w">    </span>libgrpc++-dev
 </code></pre></div>
 <hr />
 <h2 id="3-building-installing-opentelemetry-cpp-sdk">3. Building &amp; Installing <code>opentelemetry-cpp</code> SDK<a class="headerlink" href="#3-building-installing-opentelemetry-cpp-sdk" title="Permanent link">&para;</a></h2>
-<p>The OpenTelemetry C++ SDK must be built as <strong>shared libraries</strong> (<code>-DBUILD_SHARED_LIBS=ON</code>) with <strong>Position Independent Code</strong> (<code>-DCMAKE_POSITION_INDEPENDENT_CODE=ON</code>) so that ns-3 can link it into shared libraries (<code>libns3-otlp-default.so</code>).</p>
+<p>The OpenTelemetry C++ SDK must be built with shared libraries (<code>-DBUILD_SHARED_LIBS=ON</code>), position-independent code (<code>-DCMAKE_POSITION_INDEPENDENT_CODE=ON</code>), and OTLP HTTP exporter enabled:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~
 git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>https://github.com/open-telemetry/opentelemetry-cpp.git
 <span class="nb">cd</span><span class="w"> </span>opentelemetry-cpp
@@ -872,8 +868,9 @@ cmake<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/
 <span class="w">      </span>-DWITH_BENCHMARK<span class="o">=</span>OFF<span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-DCMAKE_POSITION_INDEPENDENT_CODE<span class="o">=</span>ON<span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-DBUILD_SHARED_LIBS<span class="o">=</span>ON<span class="w"> </span><span class="se">\</span>
-<span class="w">      </span>-DWITH_OTLP_GRPC<span class="o">=</span>ON<span class="w"> </span><span class="se">\</span>
-<span class="w">      </span>-DWITH_OTLP_HTTP<span class="o">=</span>ON<span class="w"> </span>..
+<span class="w">      </span>-DWITH_OTLP_GRPC<span class="o">=</span>OFF<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DWITH_OTLP_HTTP<span class="o">=</span>ON<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DWITH_METRICS_EXEMPLAR_PREVIEW<span class="o">=</span>ON<span class="w"> </span>..
 
 make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
 sudo<span class="w"> </span>make<span class="w"> </span>install
@@ -881,16 +878,16 @@ sudo<span class="w"> </span>ldconfig
 </code></pre></div>
 <hr />
 <h2 id="4-configuring-ns-3-build-system">4. Configuring ns-3 Build System<a class="headerlink" href="#4-configuring-ns-3-build-system" title="Permanent link">&para;</a></h2>
-<p>To enable <code>ns3-otlp</code> inside ns-3:</p>
+<p>To build <code>ns3-otlp</code> inside ns-3:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~/ns-allinone-3.46.1/ns-3.46.1
 ./ns3<span class="w"> </span>configure<span class="w"> </span>--enable-examples<span class="w"> </span>--enable-tests
 ./ns3<span class="w"> </span>build<span class="w"> </span>otlp
 </code></pre></div>
-<h3 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h3>
-<p>Check that <code>pkg-config</code> detects OpenTelemetry:</p>
-<div class="highlight"><pre><span></span><code>pkg-config<span class="w"> </span>--modversion<span class="w"> </span>opentelemetry_trace
-<span class="c1"># Expected output: 1.29.0-dev (or installed version)</span>
+<h3 id="graceful-fallback-verification">Graceful Fallback Verification<a class="headerlink" href="#graceful-fallback-verification" title="Permanent link">&para;</a></h3>
+<p>If <code>opentelemetry-cpp</code> is absent, <code>./ns3 configure</code> outputs:
+<div class="highlight"><pre><span></span><code>ns3-otlp: opentelemetry-cpp not found via pkg-config — skipping module.
 </code></pre></div>
+and completes without error.</p>
 
 
 

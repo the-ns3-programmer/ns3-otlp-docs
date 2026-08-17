@@ -483,10 +483,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#purpose" class="md-nav__link">
+  <a href="#overview-purpose" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Purpose
+        Overview &amp; Purpose
       
     </span>
   </a>
@@ -494,13 +494,30 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#class-definition-modelotlp-trace-sinkh" class="md-nav__link">
+  <a href="#detailed-api-specification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Class Definition (model/otlp-trace-sink.h)
+        Detailed API Specification
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Detailed API Specification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#class-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Declaration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -516,10 +533,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-modelotlp-trace-sinkcc" class="md-nav__link">
+  <a href="#implementation-code-modelotlp-trace-sinkcc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation (model/otlp-trace-sink.cc)
+        Implementation Code (model/otlp-trace-sink.cc)
       
     </span>
   </a>
@@ -733,10 +750,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#purpose" class="md-nav__link">
+  <a href="#overview-purpose" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Purpose
+        Overview &amp; Purpose
       
     </span>
   </a>
@@ -744,13 +761,30 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#class-definition-modelotlp-trace-sinkh" class="md-nav__link">
+  <a href="#detailed-api-specification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Class Definition (model/otlp-trace-sink.h)
+        Detailed API Specification
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Detailed API Specification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#class-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Declaration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -766,10 +800,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-modelotlp-trace-sinkcc" class="md-nav__link">
+  <a href="#implementation-code-modelotlp-trace-sinkcc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation (model/otlp-trace-sink.cc)
+        Implementation Code (model/otlp-trace-sink.cc)
       
     </span>
   </a>
@@ -797,58 +831,56 @@
 
 
 <h1 id="04-component-2-oteltracesink-span-exporter-attributes">04. Component 2: OtelTraceSink (Span Exporter &amp; Attributes)<a class="headerlink" href="#04-component-2-oteltracesink-span-exporter-attributes" title="Permanent link">&para;</a></h1>
-<h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">&para;</a></h2>
-<p><code>OtelTraceSink</code> connects ns-3 packet trace events (<code>PacketTx</code>, <code>PacketRx</code>, <code>PacketDrop</code>) to OpenTelemetry <code>Tracer</code> instances. It constructs spans tagged with packet attributes, node IDs, event types, and drop reasons.</p>
+<h2 id="overview-purpose">Overview &amp; Purpose<a class="headerlink" href="#overview-purpose" title="Permanent link">&para;</a></h2>
+<p><code>OtelTraceSink</code> maps ns-3 packet events (<code>TracePacketTx</code>, <code>TracePacketRx</code>, <code>TracePacketDrop</code>) to OpenTelemetry spans. It is implemented as an <code>ns3::Object</code> registered with <code>TypeId</code> under group <code>"otlp"</code>.</p>
 <hr />
-<h2 id="class-definition-modelotlp-trace-sinkh">Class Definition (<code>model/otlp-trace-sink.h</code>)<a class="headerlink" href="#class-definition-modelotlp-trace-sinkh" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="cp">#ifndef OTLP_TRACE_SINK_H</span>
-<span class="cp">#define OTLP_TRACE_SINK_H</span>
+<h2 id="detailed-api-specification">Detailed API Specification<a class="headerlink" href="#detailed-api-specification" title="Permanent link">&para;</a></h2>
+<p>Header: <code>ns3/otlp-trace-sink.h</code><br />
+Base Class: <code>ns3::Object</code><br />
+Namespace: <code>ns3</code></p>
+<h3 id="class-declaration">Class Declaration<a class="headerlink" href="#class-declaration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="w"> </span><span class="p">{</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/packet.h&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/ptr.h&quot;</span>
-
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/trace/provider.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/trace/tracer.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
-
-<span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="w"> </span><span class="p">{</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * \ingroup otlp</span>
-<span class="cm"> * \brief Trace sink mapping ns-3 packet events to OpenTelemetry spans.</span>
-<span class="cm"> */</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OtelTraceSink</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OtelTraceSink</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Object</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-<span class="w">  </span><span class="n">OtelTraceSink</span><span class="p">();</span>
-<span class="w">  </span><span class="o">~</span><span class="n">OtelTraceSink</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">TypeId</span><span class="w"> </span><span class="n">GetTypeId</span><span class="p">();</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * \brief Trace a packet transmission event.</span>
-<span class="cm">   * \param packet The ns-3 packet.</span>
-<span class="cm">   * \param nodeId ID of transmitting node.</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">TracePacketTx</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">);</span>
+<span class="w">    </span><span class="n">OtelTraceSink</span><span class="p">();</span>
+<span class="w">    </span><span class="o">~</span><span class="n">OtelTraceSink</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * \brief Trace a packet reception event.</span>
-<span class="cm">   * \param packet The ns-3 packet.</span>
-<span class="cm">   * \param nodeId ID of receiving node.</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">TracePacketRx</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Fetch active tracer from global Provider and cache m_tracer.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">InitTracer</span><span class="p">();</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * \brief Trace a packet drop event.</span>
-<span class="cm">   * \param packet The ns-3 packet.</span>
-<span class="cm">   * \param nodeId ID of node dropping packet.</span>
-<span class="cm">   * \param reason Description or reason for packet drop.</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">TracePacketDrop</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="o">&amp;</span><span class="n">reason</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Trace a packet transmission event.</span>
+<span class="cm">     * \param packet The ns-3 packet being transmitted.</span>
+<span class="cm">     * \param nodeId ID of the transmitting node.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">TracePacketTx</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Trace a packet reception event.</span>
+<span class="cm">     * \param packet The ns-3 packet being received.</span>
+<span class="cm">     * \param nodeId ID of the receiving node.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">TracePacketRx</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Trace a packet drop event.</span>
+<span class="cm">     * \param packet The ns-3 packet being dropped.</span>
+<span class="cm">     * \param nodeId ID of the node dropping the packet.</span>
+<span class="cm">     * \param reason String explanation for the drop.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">TracePacketDrop</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">Tracer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_tracer</span><span class="p">;</span>
 <span class="p">};</span>
 
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace ns3</span>
-
-<span class="cp">#endif </span><span class="c1">// OTLP_TRACE_SINK_H</span>
 </code></pre></div>
 <hr />
 <h2 id="attribute-mapping-dictionary">Attribute Mapping Dictionary<a class="headerlink" href="#attribute-mapping-dictionary" title="Permanent link">&para;</a></h2>
@@ -891,90 +923,100 @@
 <td style="text-align: left;"><code>ns3.drop_reason</code></td>
 <td style="text-align: left;"><code>string</code></td>
 <td style="text-align: left;">Reason for drop (only on drop spans)</td>
-<td style="text-align: left;"><code>BUFFER_OVERFLOW</code>, <code>WIFI_PHY_SNR_LOW</code></td>
+<td style="text-align: left;"><code>PHY_DROP</code>, <code>WIFI_PHY_1</code></td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="implementation-modelotlp-trace-sinkcc">Implementation (<code>model/otlp-trace-sink.cc</code>)<a class="headerlink" href="#implementation-modelotlp-trace-sinkcc" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;otlp-trace-sink.h&quot;</span>
+<h2 id="implementation-code-modelotlp-trace-sinkcc">Implementation Code (<code>model/otlp-trace-sink.cc</code>)<a class="headerlink" href="#implementation-code-modelotlp-trace-sinkcc" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// SPDX-License-Identifier: GPL-3.0-or-later</span>
+<span class="c1">// Copyright (C) 2026 Arun Santhosh R A &lt;arunsanthosh.rashok@gmail.com&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;otlp-trace-sink.h&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;otlp-clock-provider.h&quot;</span>
 
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/log.h&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/trace/provider.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/trace/span_startoptions.h&gt;</span>
 
-<span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="w"> </span><span class="p">{</span>
-
-<span class="n">OtelTraceSink</span><span class="o">::</span><span class="n">OtelTraceSink</span><span class="p">()</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span>
 <span class="p">{</span>
+
+<span class="n">NS_LOG_COMPONENT_DEFINE</span><span class="p">(</span><span class="s">&quot;OtelTraceSink&quot;</span><span class="p">);</span>
+<span class="n">NS_OBJECT_ENSURE_REGISTERED</span><span class="p">(</span><span class="n">OtelTraceSink</span><span class="p">);</span>
+
+<span class="n">TypeId</span>
+<span class="nf">OtelTraceSink::GetTypeId</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">TypeId</span><span class="w"> </span><span class="n">tid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TypeId</span><span class="p">(</span><span class="s">&quot;ns3::OtelTraceSink&quot;</span><span class="p">)</span>
+<span class="w">                            </span><span class="p">.</span><span class="n">SetParent</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span><span class="p">()</span>
+<span class="w">                            </span><span class="p">.</span><span class="n">SetGroupName</span><span class="p">(</span><span class="s">&quot;otlp&quot;</span><span class="p">)</span>
+<span class="w">                            </span><span class="p">.</span><span class="n">AddConstructor</span><span class="o">&lt;</span><span class="n">OtelTraceSink</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">tid</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">OtelTraceSink</span><span class="o">::</span><span class="n">OtelTraceSink</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">m_tracer</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">void</span>
+<span class="n">OtelTraceSink</span><span class="o">::</span><span class="n">InitTracer</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">Provider</span><span class="o">::</span><span class="n">GetTracerProvider</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_tracer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="o">-&gt;</span><span class="n">GetTracer</span><span class="p">(</span><span class="s">&quot;ns3-otlp-tracer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">NS_LOG_INFO</span><span class="p">(</span><span class="s">&quot;OtelTraceSink: tracer initialised&quot;</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="kt">void</span>
 <span class="n">OtelTraceSink</span><span class="o">::</span><span class="n">TracePacketTx</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">Provider</span><span class="o">::</span><span class="n">GetTracerProvider</span><span class="p">();</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">tracer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="o">-&gt;</span><span class="n">GetTracer</span><span class="p">(</span><span class="s">&quot;ns3-otlp-tracer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">tracer</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">packet</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_tracer</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">packet</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
 
-<span class="w">  </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StartSpanOptions</span><span class="w"> </span><span class="n">options</span><span class="p">;</span>
-<span class="w">  </span><span class="n">options</span><span class="p">.</span><span class="n">start_system_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OtelClock</span><span class="o">::</span><span class="n">GetNow</span><span class="p">();</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StartSpanOptions</span><span class="w"> </span><span class="n">options</span><span class="p">;</span>
+<span class="w">    </span><span class="n">options</span><span class="p">.</span><span class="n">start_system_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OtelClock</span><span class="o">::</span><span class="n">GetNow</span><span class="p">();</span>
 
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">span</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="o">-&gt;</span><span class="n">StartSpan</span><span class="p">(</span><span class="s">&quot;packet_tx&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.packet_uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetUid</span><span class="p">())},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.packet_size&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">())},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;event.type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TX_START&quot;</span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="n">options</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">End</span><span class="p">();</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">span</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_tracer</span><span class="o">-&gt;</span><span class="n">StartSpan</span><span class="p">(</span><span class="s">&quot;packet_tx&quot;</span><span class="p">,</span>
+<span class="w">                                    </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;ns3.packet_uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetUid</span><span class="p">())},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;ns3.packet_size&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">())},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;event.type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TX_START&quot;</span><span class="p">}},</span>
+<span class="w">                                    </span><span class="n">options</span><span class="p">);</span>
+<span class="w">    </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">End</span><span class="p">();</span>
 <span class="p">}</span>
 
 <span class="kt">void</span>
 <span class="n">OtelTraceSink</span><span class="o">::</span><span class="n">TracePacketRx</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">Provider</span><span class="o">::</span><span class="n">GetTracerProvider</span><span class="p">();</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">tracer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="o">-&gt;</span><span class="n">GetTracer</span><span class="p">(</span><span class="s">&quot;ns3-otlp-tracer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">tracer</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">packet</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_tracer</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">packet</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
 
-<span class="w">  </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StartSpanOptions</span><span class="w"> </span><span class="n">options</span><span class="p">;</span>
-<span class="w">  </span><span class="n">options</span><span class="p">.</span><span class="n">start_system_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OtelClock</span><span class="o">::</span><span class="n">GetNow</span><span class="p">();</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StartSpanOptions</span><span class="w"> </span><span class="n">options</span><span class="p">;</span>
+<span class="w">    </span><span class="n">options</span><span class="p">.</span><span class="n">start_system_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OtelClock</span><span class="o">::</span><span class="n">GetNow</span><span class="p">();</span>
 
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">span</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="o">-&gt;</span><span class="n">StartSpan</span><span class="p">(</span><span class="s">&quot;packet_rx&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.packet_uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetUid</span><span class="p">())},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.packet_size&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">())},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;event.type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;RX_OK&quot;</span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="n">options</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">End</span><span class="p">();</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">span</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_tracer</span><span class="o">-&gt;</span><span class="n">StartSpan</span><span class="p">(</span><span class="s">&quot;packet_rx&quot;</span><span class="p">,</span>
+<span class="w">                                    </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;ns3.packet_uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetUid</span><span class="p">())},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;ns3.packet_size&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">())},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;event.type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;RX_OK&quot;</span><span class="p">}},</span>
+<span class="w">                                    </span><span class="n">options</span><span class="p">);</span>
+<span class="w">    </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">End</span><span class="p">();</span>
 <span class="p">}</span>
 
 <span class="kt">void</span>
-<span class="n">OtelTraceSink</span><span class="o">::</span><span class="n">TracePacketDrop</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="o">&amp;</span><span class="n">reason</span><span class="p">)</span>
+<span class="n">OtelTraceSink</span><span class="o">::</span><span class="n">TracePacketDrop</span><span class="p">(</span><span class="n">Ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">reason</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">Provider</span><span class="o">::</span><span class="n">GetTracerProvider</span><span class="p">();</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">tracer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="o">-&gt;</span><span class="n">GetTracer</span><span class="p">(</span><span class="s">&quot;ns3-otlp-tracer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">tracer</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">packet</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_tracer</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">packet</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
 
-<span class="w">  </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StartSpanOptions</span><span class="w"> </span><span class="n">options</span><span class="p">;</span>
-<span class="w">  </span><span class="n">options</span><span class="p">.</span><span class="n">start_system_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OtelClock</span><span class="o">::</span><span class="n">GetNow</span><span class="p">();</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StartSpanOptions</span><span class="w"> </span><span class="n">options</span><span class="p">;</span>
+<span class="w">    </span><span class="n">options</span><span class="p">.</span><span class="n">start_system_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OtelClock</span><span class="o">::</span><span class="n">GetNow</span><span class="p">();</span>
 
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">span</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="o">-&gt;</span><span class="n">StartSpan</span><span class="p">(</span><span class="s">&quot;packet_drop&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.packet_uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetUid</span><span class="p">())},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.packet_size&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">())},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;ns3.drop_reason&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">reason</span><span class="p">},</span>
-<span class="w">      </span><span class="p">{</span><span class="s">&quot;event.type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;DROP&quot;</span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="n">options</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">SetStatus</span><span class="p">(</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StatusCode</span><span class="o">::</span><span class="n">kError</span><span class="p">,</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
-<span class="w">  </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">End</span><span class="p">();</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">span</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_tracer</span><span class="o">-&gt;</span><span class="n">StartSpan</span><span class="p">(</span><span class="s">&quot;packet_drop&quot;</span><span class="p">,</span>
+<span class="w">                                    </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;ns3.packet_uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetUid</span><span class="p">())},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;ns3.packet_size&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">packet</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">())},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;ns3.drop_reason&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">reason</span><span class="p">},</span>
+<span class="w">                                     </span><span class="p">{</span><span class="s">&quot;event.type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;DROP&quot;</span><span class="p">}},</span>
+<span class="w">                                    </span><span class="n">options</span><span class="p">);</span>
+<span class="w">    </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">SetStatus</span><span class="p">(</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">StatusCode</span><span class="o">::</span><span class="n">kError</span><span class="p">,</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
+<span class="w">    </span><span class="n">span</span><span class="o">-&gt;</span><span class="n">End</span><span class="p">();</span>
 <span class="p">}</span>
 
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace ns3</span>

@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#05-component-3-otelmetricsink-counters-gauges" class="md-skip">
+        <a href="#05-component-3-otelmetricsink-counters-queue-histogram" class="md-skip">
           Skip to content
         </a>
       
@@ -511,10 +511,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#purpose" class="md-nav__link">
+  <a href="#overview-purpose" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Purpose
+        Overview &amp; Purpose
       
     </span>
   </a>
@@ -522,10 +522,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#class-definition-modelotlp-metric-sinkh" class="md-nav__link">
+  <a href="#detailed-api-specification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Class Definition (model/otlp-metric-sink.h)
+        Detailed API Specification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed API Specification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#class-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Declaration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metric-instruments-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metric Instruments Summary
       
     </span>
   </a>
@@ -533,10 +561,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-modelotlp-metric-sinkcc" class="md-nav__link">
+  <a href="#implementation-code-modelotlp-metric-sinkcc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation (model/otlp-metric-sink.cc)
+        Implementation Code (model/otlp-metric-sink.cc)
       
     </span>
   </a>
@@ -722,10 +750,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#purpose" class="md-nav__link">
+  <a href="#overview-purpose" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Purpose
+        Overview &amp; Purpose
       
     </span>
   </a>
@@ -733,10 +761,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#class-definition-modelotlp-metric-sinkh" class="md-nav__link">
+  <a href="#detailed-api-specification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Class Definition (model/otlp-metric-sink.h)
+        Detailed API Specification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed API Specification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#class-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Declaration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metric-instruments-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metric Instruments Summary
       
     </span>
   </a>
@@ -744,10 +800,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-modelotlp-metric-sinkcc" class="md-nav__link">
+  <a href="#implementation-code-modelotlp-metric-sinkcc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation (model/otlp-metric-sink.cc)
+        Implementation Code (model/otlp-metric-sink.cc)
       
     </span>
   </a>
@@ -774,109 +830,173 @@
   
 
 
-<h1 id="05-component-3-otelmetricsink-counters-gauges">05. Component 3: OtelMetricSink (Counters &amp; Gauges)<a class="headerlink" href="#05-component-3-otelmetricsink-counters-gauges" title="Permanent link">&para;</a></h1>
-<h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">&para;</a></h2>
-<p><code>OtelMetricSink</code> exports numerical simulation metrics (such as bytes transferred, packet drop counts, and queue occupancy) into OpenTelemetry <strong>Counters</strong> and <strong>Gauges</strong>, enabling quantitative real-time visualization in Prometheus and Grafana.</p>
+<h1 id="05-component-3-otelmetricsink-counters-queue-histogram">05. Component 3: OtelMetricSink (Counters &amp; Queue Histogram)<a class="headerlink" href="#05-component-3-otelmetricsink-counters-queue-histogram" title="Permanent link">&para;</a></h1>
+<h2 id="overview-purpose">Overview &amp; Purpose<a class="headerlink" href="#overview-purpose" title="Permanent link">&para;</a></h2>
+<p><code>OtelMetricSink</code> exports ns-3 metric data over OTLP. It defines monotonic counters for cumulative bytes (<code>ns3.bytes_transferred</code>) and packet drop counts (<code>ns3.packet_drops</code>), and a <code>Histogram</code> for non-monotonic queue occupancy samples (<code>ns3.queue_size</code>).</p>
 <hr />
-<h2 id="class-definition-modelotlp-metric-sinkh">Class Definition (<code>model/otlp-metric-sink.h</code>)<a class="headerlink" href="#class-definition-modelotlp-metric-sinkh" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="cp">#ifndef OTLP_METRIC_SINK_H</span>
-<span class="cp">#define OTLP_METRIC_SINK_H</span>
+<h2 id="detailed-api-specification">Detailed API Specification<a class="headerlink" href="#detailed-api-specification" title="Permanent link">&para;</a></h2>
+<p>Header: <code>ns3/otlp-metric-sink.h</code><br />
+Base Class: <code>ns3::Object</code><br />
+Namespace: <code>ns3</code></p>
+<h3 id="class-declaration">Class Declaration<a class="headerlink" href="#class-declaration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="w"> </span><span class="p">{</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/ptr.h&quot;</span>
-
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/metrics/meter.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/metrics/provider.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/metrics/sync_instruments.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
-
-<span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="w"> </span><span class="p">{</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * \ingroup otlp</span>
-<span class="cm"> * \brief Metric sink updating OpenTelemetry Counters with ns-3 performance data.</span>
-<span class="cm"> */</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OtelMetricSink</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OtelMetricSink</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Object</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-<span class="w">  </span><span class="n">OtelMetricSink</span><span class="p">();</span>
-<span class="w">  </span><span class="o">~</span><span class="n">OtelMetricSink</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">TypeId</span><span class="w"> </span><span class="n">GetTypeId</span><span class="p">();</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * \brief Record throughput metric (bytes processed).</span>
-<span class="cm">   * \param nodeId ID of node.</span>
-<span class="cm">   * \param bytes Bytes transferred.</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">RecordThroughput</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">bytes</span><span class="p">);</span>
+<span class="w">    </span><span class="n">OtelMetricSink</span><span class="p">();</span>
+<span class="w">    </span><span class="o">~</span><span class="n">OtelMetricSink</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * \brief Record packet drop count metric.</span>
-<span class="cm">   * \param nodeId ID of node.</span>
-<span class="cm">   * \param count Drop increment count.</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">RecordPacketDropCount</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Fetch active meter from global Provider and create instruments.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">InitMeter</span><span class="p">();</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * \brief Record current queue size metric.</span>
-<span class="cm">   * \param nodeId ID of node.</span>
-<span class="cm">   * \param packetsInQueue Current queue length.</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">RecordQueueSize</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">packetsInQueue</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Record throughput in bytes.</span>
+<span class="cm">     * \param nodeId Node ID.</span>
+<span class="cm">     * \param bytes Number of bytes transferred.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RecordThroughput</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">bytes</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Record packet drop count.</span>
+<span class="cm">     * \param nodeId Node ID.</span>
+<span class="cm">     * \param count Number of dropped packets.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RecordPacketDropCount</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * \brief Record queue occupancy sample (Histogram).</span>
+<span class="cm">     * \param nodeId Node ID.</span>
+<span class="cm">     * \param packetsInQueue Current number of packets in queue.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RecordQueueSize</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">packetsInQueue</span><span class="p">);</span>
 
 <span class="k">private</span><span class="o">:</span>
-<span class="w">  </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Meter</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_meter</span><span class="p">;</span>
-<span class="w">  </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Counter</span><span class="o">&lt;</span><span class="kt">uint64_t</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_dropCounter</span><span class="p">;</span>
-<span class="w">  </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Counter</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_throughputCounter</span><span class="p">;</span>
-<span class="w">  </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Counter</span><span class="o">&lt;</span><span class="kt">uint64_t</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_queueCounter</span><span class="p">;</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Meter</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_meter</span><span class="p">;</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Counter</span><span class="o">&lt;</span><span class="kt">uint64_t</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_dropCounter</span><span class="p">;</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Counter</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_throughputCounter</span><span class="p">;</span>
+<span class="w">    </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Histogram</span><span class="o">&lt;</span><span class="kt">uint64_t</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_queueHistogram</span><span class="p">;</span>
 <span class="p">};</span>
 
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace ns3</span>
-
-<span class="cp">#endif </span><span class="c1">// OTLP_METRIC_SINK_H</span>
 </code></pre></div>
 <hr />
-<h2 id="implementation-modelotlp-metric-sinkcc">Implementation (<code>model/otlp-metric-sink.cc</code>)<a class="headerlink" href="#implementation-modelotlp-metric-sinkcc" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;otlp-metric-sink.h&quot;</span>
+<h2 id="metric-instruments-summary">Metric Instruments Summary<a class="headerlink" href="#metric-instruments-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric Name</th>
+<th style="text-align: left;">Instrument Type</th>
+<th style="text-align: left;">Units</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ns3.bytes_transferred</code></td>
+<td style="text-align: left;"><code>Counter&lt;double&gt;</code></td>
+<td style="text-align: left;"><code>bytes</code></td>
+<td style="text-align: left;">Monotonic sum of transferred bytes per node</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ns3.packet_drops</code></td>
+<td style="text-align: left;"><code>Counter&lt;uint64_t&gt;</code></td>
+<td style="text-align: left;"><code>packets</code></td>
+<td style="text-align: left;">Monotonic count of dropped packets per node</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ns3.queue_size</code></td>
+<td style="text-align: left;"><code>Histogram&lt;uint64_t&gt;</code></td>
+<td style="text-align: left;"><code>packets</code></td>
+<td style="text-align: left;">Point-in-time queue occupancy samples per node</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="implementation-code-modelotlp-metric-sinkcc">Implementation Code (<code>model/otlp-metric-sink.cc</code>)<a class="headerlink" href="#implementation-code-modelotlp-metric-sinkcc" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// SPDX-License-Identifier: GPL-3.0-or-later</span>
+<span class="c1">// Copyright (C) 2026 Arun Santhosh R A &lt;arunsanthosh.rashok@gmail.com&gt;</span>
 
-<span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;otlp-metric-sink.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/log.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/context/context.h&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span>
+<span class="p">{</span>
+
+<span class="n">NS_LOG_COMPONENT_DEFINE</span><span class="p">(</span><span class="s">&quot;OtelMetricSink&quot;</span><span class="p">);</span>
+<span class="n">NS_OBJECT_ENSURE_REGISTERED</span><span class="p">(</span><span class="n">OtelMetricSink</span><span class="p">);</span>
+
+<span class="n">TypeId</span>
+<span class="nf">OtelMetricSink::GetTypeId</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">TypeId</span><span class="w"> </span><span class="n">tid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TypeId</span><span class="p">(</span><span class="s">&quot;ns3::OtelMetricSink&quot;</span><span class="p">)</span>
+<span class="w">                            </span><span class="p">.</span><span class="n">SetParent</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span><span class="p">()</span>
+<span class="w">                            </span><span class="p">.</span><span class="n">SetGroupName</span><span class="p">(</span><span class="s">&quot;otlp&quot;</span><span class="p">)</span>
+<span class="w">                            </span><span class="p">.</span><span class="n">AddConstructor</span><span class="o">&lt;</span><span class="n">OtelMetricSink</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">tid</span><span class="p">;</span>
+<span class="p">}</span>
 
 <span class="n">OtelMetricSink</span><span class="o">::</span><span class="n">OtelMetricSink</span><span class="p">()</span>
+<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="n">m_meter</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">),</span>
+<span class="w">      </span><span class="n">m_dropCounter</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">),</span>
+<span class="w">      </span><span class="n">m_throughputCounter</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">),</span>
+<span class="w">      </span><span class="n">m_queueHistogram</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Provider</span><span class="o">::</span><span class="n">GetMeterProvider</span><span class="p">();</span>
-<span class="w">  </span><span class="n">m_meter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="o">-&gt;</span><span class="n">GetMeter</span><span class="p">(</span><span class="s">&quot;ns3-otlp-meter&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_meter</span><span class="p">)</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_dropCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_meter</span><span class="o">-&gt;</span><span class="n">CreateUInt64Counter</span><span class="p">(</span><span class="s">&quot;ns3.packet_drops&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Number of dropped packets&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;packets&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="n">m_throughputCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_meter</span><span class="o">-&gt;</span><span class="n">CreateDoubleCounter</span><span class="p">(</span><span class="s">&quot;ns3.bytes_transferred&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Total bytes transferred&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bytes&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="n">m_queueCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_meter</span><span class="o">-&gt;</span><span class="n">CreateUInt64Counter</span><span class="p">(</span><span class="s">&quot;ns3.queue_events&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Queue length events&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;packets&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="kt">void</span>
+<span class="n">OtelMetricSink</span><span class="o">::</span><span class="n">InitMeter</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">metrics</span><span class="o">::</span><span class="n">Provider</span><span class="o">::</span><span class="n">GetMeterProvider</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_meter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="o">-&gt;</span><span class="n">GetMeter</span><span class="p">(</span><span class="s">&quot;ns3-otlp-meter&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_meter</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_dropCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_meter</span><span class="o">-&gt;</span><span class="n">CreateUInt64Counter</span><span class="p">(</span><span class="s">&quot;ns3.packet_drops&quot;</span><span class="p">,</span>
+<span class="w">                                                     </span><span class="s">&quot;Number of dropped packets&quot;</span><span class="p">,</span>
+<span class="w">                                                     </span><span class="s">&quot;packets&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">m_throughputCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_meter</span><span class="o">-&gt;</span><span class="n">CreateDoubleCounter</span><span class="p">(</span><span class="s">&quot;ns3.bytes_transferred&quot;</span><span class="p">,</span>
+<span class="w">                                                           </span><span class="s">&quot;Total bytes transferred&quot;</span><span class="p">,</span>
+<span class="w">                                                           </span><span class="s">&quot;bytes&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">m_queueHistogram</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="n">m_meter</span><span class="o">-&gt;</span><span class="n">CreateUInt64Histogram</span><span class="p">(</span><span class="s">&quot;ns3.queue_size&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Queue occupancy samples&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;packets&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">NS_LOG_INFO</span><span class="p">(</span><span class="s">&quot;OtelMetricSink: meter initialised&quot;</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="kt">void</span>
 <span class="n">OtelMetricSink</span><span class="o">::</span><span class="n">RecordThroughput</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">bytes</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_throughputCounter</span><span class="p">)</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_throughputCounter</span><span class="o">-&gt;</span><span class="n">Add</span><span class="p">(</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)}});</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_throughputCounter</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_throughputCounter</span><span class="o">-&gt;</span><span class="n">Add</span><span class="p">(</span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)}});</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kt">void</span>
 <span class="n">OtelMetricSink</span><span class="o">::</span><span class="n">RecordPacketDropCount</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">count</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_dropCounter</span><span class="p">)</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_dropCounter</span><span class="o">-&gt;</span><span class="n">Add</span><span class="p">(</span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)}});</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_dropCounter</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_dropCounter</span><span class="o">-&gt;</span><span class="n">Add</span><span class="p">(</span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)}});</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kt">void</span>
 <span class="n">OtelMetricSink</span><span class="o">::</span><span class="n">RecordQueueSize</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">packetsInQueue</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_queueCounter</span><span class="p">)</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_queueCounter</span><span class="o">-&gt;</span><span class="n">Add</span><span class="p">(</span><span class="n">packetsInQueue</span><span class="p">,</span><span class="w"> </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)}});</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_queueHistogram</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_queueHistogram</span><span class="o">-&gt;</span><span class="n">Record</span><span class="p">(</span><span class="n">packetsInQueue</span><span class="p">,</span>
+<span class="w">                                 </span><span class="p">{{</span><span class="s">&quot;ns3.node_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nodeId</span><span class="p">)}},</span>
+<span class="w">                                 </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">context</span><span class="o">::</span><span class="n">Context</span><span class="p">{});</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace ns3</span>

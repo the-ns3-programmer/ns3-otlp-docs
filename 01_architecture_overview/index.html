@@ -775,25 +775,25 @@
 <h1 id="01-architecture-overview">01. Architecture Overview<a class="headerlink" href="#01-architecture-overview" title="Permanent link">&para;</a></h1>
 <h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
 <p>Network Simulator 3 (ns-3) traditionally exports simulation results into ASCII trace files (<code>.tr</code>) or PCAP files (<code>.pcap</code>). Analyzing these outputs requires offline post-processing with custom scripts or manual Wireshark inspections.</p>
-<p><code>ns3-otlp</code> upgrades ns-3 to the <strong>cloud-native observability standard (OpenTelemetry)</strong>. It enables live, streaming telemetry export during simulation execution, allowing network engineers to visualize real-time packet timelines, distributed trace waterfalls, and performance metrics on web dashboards like <strong>Jaeger UI</strong>, <strong>Grafana</strong>, and <strong>Prometheus</strong>.</p>
+<p><code>ns3-otlp</code> upgrades ns-3 to the <strong>cloud-native observability standard (OpenTelemetry)</strong>. It enables live, streaming telemetry export during simulation execution, allowing network engineers to visualize real-time packet timelines, distributed trace waterfalls, and performance metrics on web dashboards like <strong>Jaeger UI</strong>.</p>
 <hr />
 <h2 id="high-level-system-architecture">High-Level System Architecture<a class="headerlink" href="#high-level-system-architecture" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>+-----------------------------------------------------------------------------------+
 |                                  ns-3 Simulator                                   |
 |                                                                                   |
-|  +--------------------+   TracedCallback   +-----------------------------------+  |
+|  +--------------------+   Trace Trampoline +-----------------------------------+  |
 |  | ns-3 Trace Sources | -----------------&gt; |          OtelTraceSink            |  |
-|  | (Packet Tx/Rx/Drop)|                    |  (Maps packet events to Spans)   |  |
+|  | (MacTx, MacRx, etc)|                    |    (ns3::Object, cached tracer)   |  |
 |  +--------------------+                    +-----------------+-----------------+  |
 |                                                              |                    |
-|  +--------------------+   FlowMonitor      +-----------------v-----------------+  |
-|  | ns-3 Metrics       | -----------------&gt; |          OtelMetricSink           |  |
-|  | (Throughput/Delay) |                    | (Maps metrics to Counters/Gauges) |  |
+|  +--------------------+   Trace Trampoline +-----------------v-----------------+  |
+|  | ns-3 NetDevices    | -----------------&gt; |          OtelMetricSink           |  |
+|  | (P2P, Wi-Fi)       |                    | (ns3::Object, Counters/Histogram) |  |
 |  +--------------------+                    +-----------------+-----------------+  |
 |                                                              |                    |
 |                                                    +---------v---------+          |
 |                                                    |     OtelClock     |          |
-|                                                    | Simulator::Now()  |          |
+|                                                    | wall_base + Sim   |          |
 |                                                    +---------+---------+          |
 |                                                              |                    |
 +--------------------------------------------------------------|--------------------+
@@ -801,7 +801,7 @@
                                              +-----------------------------------+
                                              |     opentelemetry-cpp SDK         |
                                              +-----------------+-----------------+
-                                                               | OTLP (HTTP/gRPC)
+                                                               | OTLP / HTTP
                                                                v
                                              +-----------------------------------+
                                              |       Jaeger / OTel Collector     |
@@ -810,10 +810,11 @@
 <hr />
 <h2 id="core-principles">Core Principles<a class="headerlink" href="#core-principles" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Virtual Time Synchronization:</strong> Real-world wall-clock timestamps ruin discrete-event simulation telemetry. <code>OtelClock</code> maps ns-3 nanoseconds directly to OTLP span timestamps.</li>
+<li><strong>Virtual Time Synchronization (<code>OtelClock</code>):</strong> Real-world wall-clock timestamps ruin discrete-event simulation telemetry. <code>OtelClock</code> anchors simulation nanoseconds to the real wall clock at <code>Install()</code> time (<code>wall_base + Simulator::Now()</code>), placing spans at today's date in Jaeger UI.</li>
 <li><strong>Type-Safe Data Mapping:</strong> Translates ns-3 object types (<code>Ptr&lt;Packet&gt;</code>, <code>Ptr&lt;Node&gt;</code>) into OpenTelemetry attribute key-value maps.</li>
-<li><strong>Idiomatic Integration:</strong> Fits into ns-3's existing helper structure (<code>OtelHelper</code>).</li>
-<li><strong>Zero-Locking Performance:</strong> Emits telemetry asynchronously over gRPC or HTTP to prevent slowing down simulation execution.</li>
+<li><strong>Idiomatic ns-3 Integration:</strong> Both <code>OtelTraceSink</code> and <code>OtelMetricSink</code> inherit from <code>ns3::Object</code>, register <code>TypeId</code> attributes under group <code>"otlp"</code>, and use <code>Ptr&lt;&gt;</code> reference-counted pointers managed by <code>OtelHelper</code>.</li>
+<li><strong>Zero Invasion:</strong> Hooks standard ns-3 trace sources (<code>MacTx</code>, <code>MacRx</code>, <code>PhyRxDrop</code>, <code>MacTxDrop</code>) via <code>TraceConnectWithoutContext</code> and bound trampoline callbacks without modifying any core ns-3 device source code.</li>
+<li><strong>Licensing:</strong> Licensed under <strong>GPL-3.0-or-later</strong>, ensuring full license compatibility with Apache-2.0 third-party dependencies (<code>opentelemetry-cpp</code> and <code>gRPC</code>).</li>
 </ol>
 
 

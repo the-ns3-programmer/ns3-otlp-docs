@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#09-automated-unit-testing-framework" class="md-skip">
+        <a href="#09-automated-unit-testing" class="md-skip">
           Skip to content
         </a>
       
@@ -626,10 +626,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#1-unit-test-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        1. Unit Test Architecture
       
     </span>
   </a>
@@ -637,21 +637,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#test-suite-implementation-contribotlptestotlp-test-suitecc" class="md-nav__link">
+  <a href="#2-running-unit-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Test Suite Implementation (contrib/otlp/test/otlp-test-suite.cc)
+        2. Running Unit Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Running Unit Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expected-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Output
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#executing-unit-tests" class="md-nav__link">
+  <a href="#3-test-suite-implementation-testotlp-test-suitecc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Executing Unit Tests
+        3. Test Suite Implementation (test/otlp-test-suite.cc)
       
     </span>
   </a>
@@ -720,10 +737,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#1-unit-test-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        1. Unit Test Architecture
       
     </span>
   </a>
@@ -731,21 +748,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#test-suite-implementation-contribotlptestotlp-test-suitecc" class="md-nav__link">
+  <a href="#2-running-unit-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Test Suite Implementation (contrib/otlp/test/otlp-test-suite.cc)
+        2. Running Unit Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Running Unit Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expected-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Output
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#executing-unit-tests" class="md-nav__link">
+  <a href="#3-test-suite-implementation-testotlp-test-suitecc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Executing Unit Tests
+        3. Test Suite Implementation (test/otlp-test-suite.cc)
       
     </span>
   </a>
@@ -772,106 +806,79 @@
   
 
 
-<h1 id="09-automated-unit-testing-framework">09. Automated Unit Testing Framework<a class="headerlink" href="#09-automated-unit-testing-framework" title="Permanent link">&para;</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p><code>ns3-otlp</code> includes an automated unit test suite (<code>test/otlp-test-suite.cc</code>) integrated directly into ns-3's <code>test-runner</code>.</p>
+<h1 id="09-automated-unit-testing">09. Automated Unit Testing<a class="headerlink" href="#09-automated-unit-testing" title="Permanent link">&para;</a></h1>
+<p>This guide covers running unit tests for <code>ns3-otlp</code> using the ns-3 test runner.</p>
 <hr />
-<h2 id="test-suite-implementation-contribotlptestotlp-test-suitecc">Test Suite Implementation (<code>contrib/otlp/test/otlp-test-suite.cc</code>)<a class="headerlink" href="#test-suite-implementation-contribotlptestotlp-test-suitecc" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/test.h&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/otlp-module.h&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/simulator.h&quot;</span>
+<h2 id="1-unit-test-architecture">1. Unit Test Architecture<a class="headerlink" href="#1-unit-test-architecture" title="Permanent link">&para;</a></h2>
+<p>The <code>otlp-test-suite</code> uses <code>InMemorySpanExporter</code> (<code>opentelemetry_exporter_in_memory</code>) from the OpenTelemetry C++ SDK:</p>
+<ul>
+<li><strong>Isolated Execution:</strong> Tests run completely offline with zero network calls to localhost:4318.</li>
+<li><strong>Fast CI Execution:</strong> Prevents timeouts or connection stalls when running in headless CI environments.</li>
+<li><strong>Exact Assertions:</strong> Validates span names, attributes, <code>OtelClock</code> conversion accuracy, and error statuses directly in memory.</li>
+</ul>
+<hr />
+<h2 id="2-running-unit-tests">2. Running Unit Tests<a class="headerlink" href="#2-running-unit-tests" title="Permanent link">&para;</a></h2>
+<p>Execute the OTLP test suite via <code>./ns3</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~/ns-allinone-3.46.1/ns-3.46.1
+./ns3<span class="w"> </span>run<span class="w"> </span><span class="s2">&quot;test-runner --suite=otlp --verbose&quot;</span>
+</code></pre></div>
+<h3 id="expected-output">Expected Output<a class="headerlink" href="#expected-output" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>PASS: OtelTraceSinkTestCase
+PASS: OtelClockTestCase
+1 of 1 test suites passed (1 of 1 tests passed)
+</code></pre></div>
+<hr />
+<h2 id="3-test-suite-implementation-testotlp-test-suitecc">3. Test Suite Implementation (<code>test/otlp-test-suite.cc</code>)<a class="headerlink" href="#3-test-suite-implementation-testotlp-test-suitecc" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// SPDX-License-Identifier: GPL-3.0-or-later</span>
+<span class="c1">// Copyright (C) 2026 Arun Santhosh R A &lt;arunsanthosh.rashok@gmail.com&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/log.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/otlp-clock-provider.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/otlp-trace-sink.h&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/packet.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ns3/test.h&quot;</span>
 
-<span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/exporter/memory/in_memory_span_exporter.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/exporter/memory/in_memory_span_data.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/sdk/trace/simple_processor_factory.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/sdk/trace/tracer_provider_factory.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;opentelemetry/trace/provider.h&gt;</span>
 
-<span class="c1">// 1. Clock Test Case</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OtelClockTestCase</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TestCase</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">  </span><span class="n">OtelClockTestCase</span><span class="p">();</span>
-<span class="w">  </span><span class="o">~</span><span class="n">OtelClockTestCase</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">ns3</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">exporter</span><span class="o">::</span><span class="n">memory</span><span class="o">::</span><span class="n">SpanData</span><span class="p">;</span>
 
-<span class="k">private</span><span class="o">:</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">DoRun</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="p">;</span>
-<span class="p">};</span>
-
-<span class="n">OtelClockTestCase</span><span class="o">::</span><span class="n">OtelClockTestCase</span><span class="p">()</span>
-<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">TestCase</span><span class="p">(</span><span class="s">&quot;Check OtelClock timestamp conversion with Simulator::Now()&quot;</span><span class="p">)</span>
-<span class="p">{</span>
-<span class="p">}</span>
-
-<span class="kt">void</span>
-<span class="n">OtelClockTestCase</span><span class="o">::</span><span class="n">DoRun</span><span class="p">()</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="n">Time</span><span class="w"> </span><span class="n">simTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NanoSeconds</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
-<span class="w">  </span><span class="n">Simulator</span><span class="o">::</span><span class="n">Stop</span><span class="p">(</span><span class="n">simTime</span><span class="p">);</span>
-<span class="w">  </span><span class="n">Simulator</span><span class="o">::</span><span class="n">Run</span><span class="p">();</span>
-
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">otelTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OtelClock</span><span class="o">::</span><span class="n">GetNow</span><span class="p">();</span>
-<span class="w">  </span><span class="n">NS_TEST_ASSERT_MSG_EQ</span><span class="p">(</span><span class="n">Simulator</span><span class="o">::</span><span class="n">Now</span><span class="p">().</span><span class="n">GetNanoSeconds</span><span class="p">(),</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Simulator time should be 100 ns&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="n">NS_TEST_ASSERT_MSG_GT</span><span class="p">(</span><span class="n">otelTime</span><span class="p">.</span><span class="n">time_since_epoch</span><span class="p">().</span><span class="n">count</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;OtelClock timestamp should be &gt; 0&quot;</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">Simulator</span><span class="o">::</span><span class="n">Destroy</span><span class="p">();</span>
-<span class="p">}</span>
-
-<span class="c1">// 2. Trace Sink Test Case</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OtelTraceSinkTestCase</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TestCase</span>
 <span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">  </span><span class="n">OtelTraceSinkTestCase</span><span class="p">();</span>
-<span class="w">  </span><span class="o">~</span><span class="n">OtelTraceSinkTestCase</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+<span class="w">  </span><span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">OtelTraceSinkTestCase</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">TestCase</span><span class="p">(</span><span class="s">&quot;Test OtelTraceSink using InMemorySpanExporter&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 
-<span class="k">private</span><span class="o">:</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">DoRun</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">DoRun</span><span class="p">()</span><span class="w"> </span><span class="k">override</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">maxSpans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SpanData</span><span class="o">&gt;</span><span class="p">(</span><span class="n">maxSpans</span><span class="p">);</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">exporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">exporter</span><span class="o">::</span><span class="n">memory</span><span class="o">::</span><span class="n">InMemorySpanExporterFactory</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">processor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">sdk</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">SimpleSpanProcessorFactory</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">exporter</span><span class="p">));</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">sdkProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">sdk</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">TracerProviderFactory</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">processor</span><span class="p">));</span>
+
+<span class="w">        </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">nostd</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">TracerProvider</span><span class="o">&gt;</span><span class="w"> </span><span class="n">provider</span><span class="p">(</span><span class="n">sdkProvider</span><span class="p">.</span><span class="n">release</span><span class="p">());</span>
+<span class="w">        </span><span class="n">opentelemetry</span><span class="o">::</span><span class="n">trace</span><span class="o">::</span><span class="n">Provider</span><span class="o">::</span><span class="n">SetTracerProvider</span><span class="p">(</span><span class="n">provider</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">Ptr</span><span class="o">&lt;</span><span class="n">OtelTraceSink</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sink</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateObject</span><span class="o">&lt;</span><span class="n">OtelTraceSink</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">        </span><span class="n">sink</span><span class="o">-&gt;</span><span class="n">InitTracer</span><span class="p">();</span>
+
+<span class="w">        </span><span class="n">Ptr</span><span class="o">&lt;</span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Create</span><span class="o">&lt;</span><span class="n">Packet</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">512</span><span class="p">);</span>
+<span class="w">        </span><span class="n">sink</span><span class="o">-&gt;</span><span class="n">TracePacketTx</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">        </span><span class="n">sink</span><span class="o">-&gt;</span><span class="n">TracePacketRx</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">        </span><span class="n">sink</span><span class="o">-&gt;</span><span class="n">TracePacketDrop</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;BUFFER_FULL&quot;</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">spans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">GetSpans</span><span class="p">();</span>
+<span class="w">        </span><span class="n">NS_TEST_ASSERT_MSG_EQ</span><span class="p">(</span><span class="n">spans</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Should have exported 3 spans&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">NS_TEST_ASSERT_MSG_EQ</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">GetName</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;packet_tx&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Span 0 should be packet_tx&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">NS_TEST_ASSERT_MSG_EQ</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">GetName</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;packet_rx&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Span 1 should be packet_rx&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">NS_TEST_ASSERT_MSG_EQ</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">GetName</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;packet_drop&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Span 2 should be packet_drop&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
-
-<span class="n">OtelTraceSinkTestCase</span><span class="o">::</span><span class="n">OtelTraceSinkTestCase</span><span class="p">()</span>
-<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">TestCase</span><span class="p">(</span><span class="s">&quot;Check OtelTraceSink packet event handling&quot;</span><span class="p">)</span>
-<span class="p">{</span>
-<span class="p">}</span>
-
-<span class="kt">void</span>
-<span class="n">OtelTraceSinkTestCase</span><span class="o">::</span><span class="n">DoRun</span><span class="p">()</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="n">OtelHelper</span><span class="w"> </span><span class="n">otel</span><span class="p">(</span><span class="s">&quot;ns3-unit-test&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">traceSink</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">otel</span><span class="p">.</span><span class="n">GetTraceSink</span><span class="p">();</span>
-
-<span class="w">  </span><span class="n">Ptr</span><span class="o">&lt;</span><span class="n">Packet</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Create</span><span class="o">&lt;</span><span class="n">Packet</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">512</span><span class="p">);</span>
-<span class="w">  </span><span class="n">NS_TEST_ASSERT_MSG_NE</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Packet creation failed&quot;</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">traceSink</span><span class="o">-&gt;</span><span class="n">TracePacketTx</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="w">  </span><span class="n">traceSink</span><span class="o">-&gt;</span><span class="n">TracePacketRx</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
-<span class="w">  </span><span class="n">traceSink</span><span class="o">-&gt;</span><span class="n">TracePacketDrop</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TEST_DROP&quot;</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">Simulator</span><span class="o">::</span><span class="n">Destroy</span><span class="p">();</span>
-<span class="p">}</span>
-
-<span class="c1">// 3. Test Suite Class</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OtlpTestSuite</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TestSuite</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">  </span><span class="n">OtlpTestSuite</span><span class="p">();</span>
-<span class="p">};</span>
-
-<span class="n">OtlpTestSuite</span><span class="o">::</span><span class="n">OtlpTestSuite</span><span class="p">()</span>
-<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">TestSuite</span><span class="p">(</span><span class="s">&quot;otlp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">TestSuite</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">UNIT</span><span class="p">)</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="n">AddTestCase</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">OtelClockTestCase</span><span class="p">,</span><span class="w"> </span><span class="n">TestCase</span><span class="o">::</span><span class="n">Duration</span><span class="o">::</span><span class="n">QUICK</span><span class="p">);</span>
-<span class="w">  </span><span class="n">AddTestCase</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">OtelTraceSinkTestCase</span><span class="p">,</span><span class="w"> </span><span class="n">TestCase</span><span class="o">::</span><span class="n">Duration</span><span class="o">::</span><span class="n">QUICK</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">static</span><span class="w"> </span><span class="n">OtlpTestSuite</span><span class="w"> </span><span class="n">g_otlpTestSuite</span><span class="p">;</span>
-
-<span class="p">}</span><span class="w"> </span><span class="c1">// namespace ns3</span>
 </code></pre></div>
-<hr />
-<h2 id="executing-unit-tests">Executing Unit Tests<a class="headerlink" href="#executing-unit-tests" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~/ns-allinone-3.46.1/ns-3.46.1
-./ns3<span class="w"> </span>run<span class="w"> </span><span class="s2">&quot;test-runner --suite=otlp&quot;</span>
-</code></pre></div>
-<p>Expected output:
-<div class="highlight"><pre><span></span><code>PASS otlp 0.021 s
-</code></pre></div></p>
 
 
 

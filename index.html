@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ns3-otlp-documentation-manual" class="md-skip">
+        <a href="#ns3-otlp-documentation" class="md-skip">
           Skip to content
         </a>
       
@@ -318,10 +318,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#table-of-contents" class="md-nav__link">
+  <a href="#navigation-directory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Table of Contents
+        Navigation Directory
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Navigation Directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture &amp; Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-reference-core-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Reference &amp; Core Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guides-testing-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guides, Testing &amp; Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start Summary
       
     </span>
   </a>
@@ -329,10 +379,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#project-metadata" class="md-nav__link">
+  <a href="#module-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Project Metadata
+        Module Metadata
       
     </span>
   </a>
@@ -707,10 +757,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#table-of-contents" class="md-nav__link">
+  <a href="#navigation-directory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Table of Contents
+        Navigation Directory
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Navigation Directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture &amp; Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-reference-core-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Reference &amp; Core Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guides-testing-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guides, Testing &amp; Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start Summary
       
     </span>
   </a>
@@ -718,10 +818,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#project-metadata" class="md-nav__link">
+  <a href="#module-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Project Metadata
+        Module Metadata
       
     </span>
   </a>
@@ -748,30 +848,60 @@
   
 
 
-<h1 id="ns3-otlp-documentation-manual">ns3-otlp Documentation Manual<a class="headerlink" href="#ns3-otlp-documentation-manual" title="Permanent link">&para;</a></h1>
-<p>Welcome to the official technical documentation for <strong><code>ns3-otlp</code></strong>, an open-source C++ extension module for Network Simulator 3 (ns-3) that exports real-time simulation traces and performance metrics over OTLP (OpenTelemetry Protocol, gRPC/HTTP) directly to cloud-native observability backends including Jaeger UI, Grafana, and Prometheus.</p>
+<h1 id="ns3-otlp-documentation">ns3-otlp Documentation<a class="headerlink" href="#ns3-otlp-documentation" title="Permanent link">&para;</a></h1>
+<p>Welcome to the official technical documentation for <strong>ns3-otlp</strong>, a native OpenTelemetry extension module for Network Simulator 3 (ns-3).</p>
+<p><code>ns3-otlp</code> bridges discrete-event network simulation with cloud-native observability by exporting real simulation traces and performance metrics over OTLP/HTTP to backends such as <strong>Jaeger UI</strong>.</p>
 <hr />
-<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
-<ol>
-<li><a href="01_architecture_overview/">Architecture Overview</a></li>
-<li><a href="02_prerequisites_and_setup/">Prerequisites &amp; Environment Setup</a></li>
-<li><a href="03_otel_clock/">Component 1: OtelClock (Virtual Time Synchronization)</a></li>
-<li><a href="04_otel_trace_sink/">Component 2: OtelTraceSink (Span Exporter &amp; Attributes)</a></li>
-<li><a href="05_otel_metric_sink/">Component 3: OtelMetricSink (Counters &amp; Gauges)</a></li>
-<li><a href="06_otel_helper/">Component 4: OtelHelper (Initialization &amp; Exporter Pipeline)</a></li>
-<li><a href="07_tutorials_and_examples/">Tutorials &amp; Simulation Examples</a></li>
-<li><a href="08_observability_dashboards/">Observability Dashboards (Docker + Jaeger UI)</a></li>
-<li><a href="09_unit_testing/">Automated Unit Testing Framework</a></li>
-<li><a href="10_troubleshooting_faq/">Troubleshooting &amp; FAQ</a></li>
-</ol>
+<h2 id="navigation-directory">Navigation Directory<a class="headerlink" href="#navigation-directory" title="Permanent link">&para;</a></h2>
+<h3 id="architecture-setup">Architecture &amp; Setup<a class="headerlink" href="#architecture-setup" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="01_architecture_overview/"><strong>01. Architecture Overview</strong></a> — High-level system design, virtual clock anchoring (<code>OtelClock</code>), ns-3 <code>Object</code>/<code>TypeId</code> integration, trace trampolines, and OTLP exporter pipeline.</li>
+<li><a href="02_prerequisites_and_setup/"><strong>02. Prerequisites &amp; Environment Setup</strong></a> — System requirements, installing dependencies, building <code>opentelemetry-cpp</code> from source, configuring ns-3, and running Jaeger.</li>
+</ul>
+<h3 id="api-reference-core-components">API Reference &amp; Core Components<a class="headerlink" href="#api-reference-core-components" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="03_otel_clock/"><strong>03. OtelClock (Virtual Time)</strong></a> — Wall-clock anchored time conversion API and nanosecond timestamp synchronization.</li>
+<li><a href="04_otel_trace_sink/"><strong>04. OtelTraceSink (Span Exporter)</strong></a> — OpenTelemetry trace span exporter API, attribute dictionary, and span lifecycle.</li>
+<li><a href="05_otel_metric_sink/"><strong>05. OtelMetricSink (Metrics)</strong></a> — Metrics exporter API covering throughput counters, drop counters, and queue occupancy histograms.</li>
+<li><a href="06_otel_helper/"><strong>06. OtelHelper (Pipeline)</strong></a> — Helper orchestrator API, lifecycle management, and trace source trampoline hooks for P2P and Wi-Fi devices.</li>
+</ul>
+<h3 id="guides-testing-troubleshooting">Guides, Testing &amp; Troubleshooting<a class="headerlink" href="#guides-testing-troubleshooting" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="07_tutorials_and_examples/"><strong>07. Tutorials &amp; Simulation Examples</strong></a> — Complete C++ simulation code for Point-to-Point UDP Echo and 802.11b Wi-Fi Ad-hoc examples.</li>
+<li><a href="08_observability_dashboards/"><strong>08. Observability Dashboards</strong></a> — Running Jaeger UI, searching trace waterfalls, and verifying span attributes.</li>
+<li><a href="09_unit_testing/"><strong>09. Automated Unit Testing</strong></a> — Offline unit testing with <code>InMemorySpanExporter</code>.</li>
+<li><a href="10_troubleshooting_faq/"><strong>10. Troubleshooting &amp; FAQ</strong></a> — Resolving build issues, pkg-config paths, Docker commands, and common questions.</li>
+</ul>
 <hr />
-<h2 id="project-metadata">Project Metadata<a class="headerlink" href="#project-metadata" title="Permanent link">&para;</a></h2>
+<h2 id="quick-start-summary">Quick Start Summary<a class="headerlink" href="#quick-start-summary" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Start Jaeger UI &amp; OTLP HTTP receiver (Port 4318)</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>jaeger<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">4318</span>:4318<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">16686</span>:16686<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jaegertracing/all-in-one:1.57
+
+<span class="c1"># 2. Configure &amp; build ns-3 with OTLP module</span>
+<span class="nb">cd</span><span class="w"> </span>~/ns-allinone-3.46.1/ns-3.46.1
+./ns3<span class="w"> </span>configure<span class="w"> </span>--enable-examples<span class="w"> </span>--enable-tests
+./ns3<span class="w"> </span>build<span class="w"> </span>otlp
+
+<span class="c1"># 3. Run unit tests (offline, no network required)</span>
+./ns3<span class="w"> </span>run<span class="w"> </span><span class="s2">&quot;test-runner --suite=otlp --verbose&quot;</span>
+
+<span class="c1"># 4. Run interactive P2P simulation example</span>
+./ns3<span class="w"> </span>run<span class="w"> </span>otlp-basic-example
+
+<span class="c1"># 5. Open Jaeger UI in your browser: http://localhost:16686</span>
+</code></pre></div>
+<hr />
+<h2 id="module-metadata">Module Metadata<a class="headerlink" href="#module-metadata" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Version:</strong> 1.0.0</li>
-<li><strong>Author &amp; Maintainer:</strong> Arun Santhosh R A (arunsanthosh.rashok@gmail.com)</li>
-<li><strong>License:</strong> GNU General Public License v2.0 (GPLv2)</li>
-<li><strong>Target Simulator:</strong> ns-3.36+ (tested on ns-3.46.1)</li>
-<li><strong>C++ Standard:</strong> C++17 / C++20 / C++23</li>
+<li><strong>License:</strong> GNU General Public License v3.0 or later (<code>GPL-3.0-or-later</code>)</li>
+<li><strong>SPDX Identifier:</strong> <code>GPL-3.0-or-later</code></li>
+<li><strong>Target Simulator:</strong> ns-3 (tested on ns-3.46.1)</li>
+<li><strong>OTel SDK Compatibility:</strong> <code>opentelemetry-cpp</code> ≥ 1.13.0</li>
+<li><strong>Author:</strong> Arun Santhosh R A (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#97;&#114;&#117;&#110;&#115;&#97;&#110;&#116;&#104;&#111;&#115;&#104;&#46;&#114;&#97;&#115;&#104;&#111;&#107;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">&#97;&#114;&#117;&#110;&#115;&#97;&#110;&#116;&#104;&#111;&#115;&#104;&#46;&#114;&#97;&#115;&#104;&#111;&#107;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;</a>)</li>
 </ul>
 
 

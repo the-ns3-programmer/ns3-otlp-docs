@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#08-observability-dashboards-docker-jaeger-ui" class="md-skip">
+        <a href="#08-observability-dashboards-jaeger-ui" class="md-skip">
           Skip to content
         </a>
       
@@ -599,10 +599,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#1-starting-jaeger-ui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        1. Starting Jaeger UI
       
     </span>
   </a>
@@ -610,10 +610,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#docker-compose-configuration-contribotlpdocker-composeyml" class="md-nav__link">
+  <a href="#2-searching-and-inspecting-spans" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Docker Compose Configuration (contrib/otlp/docker-compose.yml)
+        2. Searching and Inspecting Spans
       
     </span>
   </a>
@@ -621,32 +621,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#starting-the-telemetry-dashboard" class="md-nav__link">
+  <a href="#3-timestamp-anchoring-verification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starting the Telemetry Dashboard
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-jaeger-ui" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using Jaeger UI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#interpreting-jaeger-visualizations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interpreting Jaeger Visualizations
+        3. Timestamp Anchoring Verification
       
     </span>
   </a>
@@ -742,10 +720,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#1-starting-jaeger-ui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        1. Starting Jaeger UI
       
     </span>
   </a>
@@ -753,10 +731,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#docker-compose-configuration-contribotlpdocker-composeyml" class="md-nav__link">
+  <a href="#2-searching-and-inspecting-spans" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Docker Compose Configuration (contrib/otlp/docker-compose.yml)
+        2. Searching and Inspecting Spans
       
     </span>
   </a>
@@ -764,32 +742,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#starting-the-telemetry-dashboard" class="md-nav__link">
+  <a href="#3-timestamp-anchoring-verification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starting the Telemetry Dashboard
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-jaeger-ui" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using Jaeger UI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#interpreting-jaeger-visualizations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interpreting Jaeger Visualizations
+        3. Timestamp Anchoring Verification
       
     </span>
   </a>
@@ -816,48 +772,39 @@
   
 
 
-<h1 id="08-observability-dashboards-docker-jaeger-ui">08. Observability Dashboards (Docker + Jaeger UI)<a class="headerlink" href="#08-observability-dashboards-docker-jaeger-ui" title="Permanent link">&para;</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>To visualize telemetry emitted by <code>ns3-otlp</code>, a Docker container stack running <strong>Jaeger UI</strong> and <strong>OpenTelemetry Collector</strong> is provided in <code>contrib/otlp/docker-compose.yml</code>.</p>
+<h1 id="08-observability-dashboards-jaeger-ui">08. Observability Dashboards (Jaeger UI)<a class="headerlink" href="#08-observability-dashboards-jaeger-ui" title="Permanent link">&para;</a></h1>
+<p>This guide describes viewing and analyzing exported simulation telemetry in Jaeger UI.</p>
 <hr />
-<h2 id="docker-compose-configuration-contribotlpdocker-composeyml">Docker Compose Configuration (<code>contrib/otlp/docker-compose.yml</code>)<a class="headerlink" href="#docker-compose-configuration-contribotlpdocker-composeyml" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.8&#39;</span>
-
-<span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">jaeger</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jaegertracing/all-in-one:latest</span>
-<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ns3-jaeger</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COLLECTOR_OTLP_ENABLED=true</span>
-<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;16686:16686&quot;</span><span class="w"> </span><span class="c1"># Jaeger Web UI</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;4317:4317&quot;</span><span class="w">   </span><span class="c1"># OTLP gRPC receiver</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;4318:4318&quot;</span><span class="w">   </span><span class="c1"># OTLP HTTP receiver</span>
+<h2 id="1-starting-jaeger-ui">1. Starting Jaeger UI<a class="headerlink" href="#1-starting-jaeger-ui" title="Permanent link">&para;</a></h2>
+<p>Run Jaeger using Docker:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>jaeger<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">4318</span>:4318<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">16686</span>:16686<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jaegertracing/all-in-one:1.57
 </code></pre></div>
+<ul>
+<li><strong>OTLP HTTP Traces Endpoint:</strong> <code>http://localhost:4318/v1/traces</code></li>
+<li><strong>Jaeger Web UI:</strong> <code>http://localhost:16686</code></li>
+</ul>
 <hr />
-<h2 id="starting-the-telemetry-dashboard">Starting the Telemetry Dashboard<a class="headerlink" href="#starting-the-telemetry-dashboard" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~/ns-allinone-3.46.1/ns-3.46.1/contrib/otlp
-docker-compose<span class="w"> </span>up<span class="w"> </span>-d
-</code></pre></div>
-<p>Check status:
-<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>ps
-</code></pre></div></p>
-<hr />
-<h2 id="using-jaeger-ui">Using Jaeger UI<a class="headerlink" href="#using-jaeger-ui" title="Permanent link">&para;</a></h2>
+<h2 id="2-searching-and-inspecting-spans">2. Searching and Inspecting Spans<a class="headerlink" href="#2-searching-and-inspecting-spans" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Open <strong><code>http://localhost:16686</code></strong> in any web browser.</li>
-<li>Under <strong>Service</strong>, select your simulation service:</li>
-<li><code>ns3-basic-p2p-simulation</code></li>
-<li><code>ns3-wifi-adhoc-simulation</code></li>
+<li>Open <strong>http://localhost:16686</strong> in your browser.</li>
+<li>In the left navigation panel under <strong>Service</strong>, select your configured service name:</li>
+<li><code>ns3-p2p-telemetry-demo</code> (from <code>otlp-basic-example</code>)</li>
+<li><code>ns3-wifi-adhoc-simulation</code> (from <code>otlp-wifi-example</code>)</li>
 <li>Click <strong>Find Traces</strong>.</li>
+<li>Spans will display grouped by operation name (<code>packet_tx</code>, <code>packet_rx</code>, <code>packet_drop</code>).</li>
+<li>Click on any trace to inspect individual packet metadata attributes:</li>
+<li><code>ns3.node_id</code></li>
+<li><code>ns3.packet_uid</code></li>
+<li><code>ns3.packet_size</code></li>
+<li><code>event.type</code></li>
+<li><code>ns3.drop_reason</code> (if applicable)</li>
 </ol>
 <hr />
-<h2 id="interpreting-jaeger-visualizations">Interpreting Jaeger Visualizations<a class="headerlink" href="#interpreting-jaeger-visualizations" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Interactive Scatter Plot:</strong> Shows execution duration of each packet event against simulation time. Teal dots indicate successful packet transmissions and receptions (<code>packet_tx</code>, <code>packet_rx</code>).</li>
-<li><strong>Error Highlights (Red Dots):</strong> Red dots highlight packet drops (e.g. <code>BUFFER_OVERFLOW</code>, <code>WIFI_PHY_SNR_LOW</code>).</li>
-<li><strong>Span Waterfall View:</strong> Clicking on any trace opens a timeline showing exact microsecond execution durations, Node IDs, Packet UIDs, and attributes.</li>
-</ul>
+<h2 id="3-timestamp-anchoring-verification">3. Timestamp Anchoring Verification<a class="headerlink" href="#3-timestamp-anchoring-verification" title="Permanent link">&para;</a></h2>
+<p>Spans appear under the current wall-clock date/time of execution because <code>OtelClock</code> adds <code>Simulator::Now()</code> as a virtual offset to the wall-clock baseline captured during <code>OtelHelper::Install()</code>.</p>
 
 
 
