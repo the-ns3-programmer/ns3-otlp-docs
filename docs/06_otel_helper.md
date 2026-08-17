@@ -1,176 +1,89 @@
-# 06. Component 4: OtelHelper (Initialization & Exporter Pipeline)
+# 06. Component 4: OtelHelper (Orchestration Pipeline)
 
-## Purpose
+## Overview & Purpose
 
-`OtelHelper` is the central user-facing API component. Following ns-3 helper conventions (`InternetStackHelper`, `FlowMonitorHelper`), it configures the OpenTelemetry export pipeline, sets up HTTP/gRPC exporters, instantiates processors, and binds sinks to simulation nodes.
+`OtelHelper` manages the OpenTelemetry `TracerProvider`, `MeterProvider`, clock anchoring, and trace source installation on ns-3 nodes. It follows a strict 3-phase lifecycle:
+
+$$\text{Setters} \longrightarrow \text{Install()} \longrightarrow \text{EnableNodeTracing()}$$
 
 ---
 
-## Class Definition (`helper/otlp-helper.h`)
+## Detailed API Specification
+
+Header: `helper/otlp-helper.h`  
+Namespace: `ns3`
+
+### Class Declaration
 
 ```cpp
-#ifndef OTLP_HELPER_H
-#define OTLP_HELPER_H
-
-#include "ns3/node-container.h"
-#include "ns3/net-device-container.h"
-#include "ns3/otlp-trace-sink.h"
-#include "ns3/otlp-metric-sink.h"
-
-#include <string>
-#include <memory>
-
 namespace ns3 {
 
-/**
- * \ingroup otlp
- * \brief User-facing helper to configure OpenTelemetry OTLP export and trace hooks in ns-3.
- */
 class OtelHelper
 {
 public:
-  OtelHelper(const std::string &serviceName = "ns3-simulation");
-  ~OtelHelper() = default;
+    OtelHelper();
+    ~OtelHelper() = default;
 
-  /**
-   * \brief Set the OTLP collector endpoint (e.g. "http://localhost:4318/v1/traces").
-   */
-  void SetEndpoint(const std::string &endpoint);
+    /**
+     * \brief Set OTLP HTTP collector traces endpoint.
+     * \param endpoint URL string (e.g. "http://localhost:4318/v1/traces").
+     * \pre Must be called before Install().
+     */
+    void SetEndpoint(const std::string& endpoint);
 
-  /**
-   * \brief Set the service name for OpenTelemetry resource.
-   */
-  void SetServiceName(const std::string &serviceName);
+    /**
+     * \brief Set telemetry service name.
+     * \param serviceName Service identifier displayed in backends.
+     * \pre Must be called before Install().
+     */
+    void SetServiceName(const std::string& serviceName);
 
-  /**
-   * \brief Configure and initialize the OTLP Exporter and Tracer Providers.
-   */
-  void ConfigureExporter();
+    /**
+     * \brief Configure providers, wall-clock anchor, and initialize sinks.
+     */
+    void Install();
 
-  /**
-   * \brief Enable packet trace hooks on a single node or node container.
-   */
-  void EnableNodeTracing(Ptr<Node> node);
-  void EnableNodeTracing(NodeContainer nodes);
+    /**
+     * \brief Connect trace sources on devices for a single node.
+     * \param node Ptr to target Node.
+     * \pre Must be called after Install().
+     */
+    void EnableNodeTracing(Ptr<Node> node);
 
-  /**
-   * \brief Get the underlying OtelTraceSink.
-   */
-  std::shared_ptr<OtelTraceSink> GetTraceSink() const;
+    /**
+     * \brief Connect trace sources on devices for a container of nodes.
+     * \param nodes NodeContainer of target nodes.
+     * \pre Must be called after Install().
+     */
+    void EnableNodeTracing(NodeContainer nodes);
 
-  /**
-   * \brief Get the underlying OtelMetricSink.
-   */
-  std::shared_ptr<OtelMetricSink> GetMetricSink() const;
+    Ptr<OtelTraceSink> GetTraceSink() const;
+    Ptr<OtelMetricSink> GetMetricSink() const;
 
 private:
-  std::string m_endpoint{"http://localhost:4318/v1/traces"};
-  std::string m_serviceName{"ns3-simulation"};
-  bool m_configured{false};
+    std::string m_endpoint{"http://localhost:4318/v1/traces"};
+    std::string m_serviceName{"ns3-simulation"};
+    bool m_configured{false};
 
-  std::shared_ptr<OtelTraceSink> m_traceSink;
-  std::shared_ptr<OtelMetricSink> m_metricSink;
+    Ptr<OtelTraceSink> m_traceSink;
+    Ptr<OtelMetricSink> m_metricSink;
 };
 
 } // namespace ns3
-
-#endif // OTLP_HELPER_H
 ```
 
 ---
 
-## Implementation (`helper/otlp-helper.cc`)
+## Trace Trampolines & Hook Matrix
 
-```cpp
-#include "otlp-helper.h"
-#include "ns3/log.h"
-#include "ns3/config.h"
+`EnableNodeTracing()` dynamically inspects device types attached to each node and connects trampolines via `TraceConnectWithoutContext` and `MakeBoundCallback`:
 
-#include <opentelemetry/exporters/otlp/otlp_http_exporter_factory.h>
-#include <opentelemetry/exporters/otlp/otlp_http_exporter_options.h>
-#include <opentelemetry/sdk/trace/tracer_provider_factory.h>
-#include <opentelemetry/sdk/trace/simple_processor_factory.h>
-#include <opentelemetry/trace/provider.h>
-#include <opentelemetry/sdk/resource/resource.h>
-
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE("OtelHelper");
-
-OtelHelper::OtelHelper(const std::string &serviceName)
-  : m_serviceName(serviceName)
-{
-  ConfigureExporter();
-  m_traceSink = std::make_shared<OtelTraceSink>();
-  m_metricSink = std::make_shared<OtelMetricSink>();
-}
-
-void
-OtelHelper::SetEndpoint(const std::string &endpoint)
-{
-  m_endpoint = endpoint;
-}
-
-void
-OtelHelper::SetServiceName(const std::string &serviceName)
-{
-  m_serviceName = serviceName;
-}
-
-void
-OtelHelper::ConfigureExporter()
-{
-  if (m_configured) return;
-
-  opentelemetry::exporter::otlp::OtlpHttpExporterOptions opts;
-  opts.url = m_endpoint;
-
-  auto exporter = opentelemetry::exporter::otlp::OtlpHttpExporterFactory::Create(opts);
-
-  auto processor = opentelemetry::sdk::trace::SimpleSpanProcessorFactory::Create(
-      std::move(exporter));
-
-  opentelemetry::sdk::resource::ResourceAttributes attributes = {
-      {"service.name", m_serviceName}};
-  auto resource = opentelemetry::sdk::resource::Resource::Create(attributes);
-
-  auto tracerProviderUnique = opentelemetry::sdk::trace::TracerProviderFactory::Create(
-      std::move(processor), resource);
-
-  std::shared_ptr<opentelemetry::trace::TracerProvider> sdkProvider = std::move(tracerProviderUnique);
-  opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider> provider(sdkProvider);
-
-  opentelemetry::trace::Provider::SetTracerProvider(provider);
-  m_configured = true;
-}
-
-void
-OtelHelper::EnableNodeTracing(Ptr<Node> node)
-{
-  if (!node) return;
-  ConfigureExporter();
-}
-
-void
-OtelHelper::EnableNodeTracing(NodeContainer nodes)
-{
-  for (auto it = nodes.Begin(); it != nodes.End(); ++it)
-  {
-    EnableNodeTracing(*it);
-  }
-}
-
-std::shared_ptr<OtelTraceSink>
-OtelHelper::GetTraceSink() const
-{
-  return m_traceSink;
-}
-
-std::shared_ptr<OtelMetricSink>
-OtelHelper::GetMetricSink() const
-{
-  return m_metricSink;
-}
-
-} // namespace ns3
-```
+| Device Type | Trace Source Name | Trampoline Function | Sinks Triggered |
+| :--- | :--- | :--- | :--- |
+| `PointToPointNetDevice` | `MacTx` | `MacTxCallback` | `TracePacketTx` + `RecordThroughput` |
+| `PointToPointNetDevice` | `MacRx` | `MacRxCallback` | `TracePacketRx` + `RecordThroughput` |
+| `PointToPointNetDevice` | `PhyRxDrop` | `PhyDropCallback` | `TracePacketDrop("PHY_DROP")` + `RecordPacketDropCount` |
+| `PointToPointNetDevice` | `MacTxDrop` | `PhyDropCallback` | `TracePacketDrop("MAC_TX_DROP")` + `RecordPacketDropCount` |
+| `WifiNetDevice` | `MacTx` | `MacTxCallback` | `TracePacketTx` + `RecordThroughput` |
+| `WifiNetDevice` | `MacRx` | `MacRxCallback` | `TracePacketRx` + `RecordThroughput` |
+| `WifiNetDevice` | `PhyRxDrop` | `WifiPhyDropCallback` | `TracePacketDrop("WIFI_PHY_<reason>")` + `RecordPacketDropCount` |

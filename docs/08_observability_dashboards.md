@@ -1,56 +1,42 @@
-# 08. Observability Dashboards (Docker + Jaeger UI)
+# 08. Observability Dashboards (Jaeger UI)
 
-## Overview
-
-To visualize telemetry emitted by `ns3-otlp`, a Docker container stack running **Jaeger UI** and **OpenTelemetry Collector** is provided in `contrib/otlp/docker-compose.yml`.
+This guide describes viewing and analyzing exported simulation telemetry in Jaeger UI.
 
 ---
 
-## Docker Compose Configuration (`contrib/otlp/docker-compose.yml`)
+## 1. Starting Jaeger UI
 
-```yaml
-version: '3.8'
-
-services:
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: ns3-jaeger
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
-    ports:
-      - "16686:16686" # Jaeger Web UI
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP HTTP receiver
-```
-
----
-
-## Starting the Telemetry Dashboard
+Run Jaeger using Docker:
 
 ```bash
-cd ~/ns-allinone-3.46.1/ns-3.46.1/contrib/otlp
-docker-compose up -d
+docker run -d --name jaeger \
+  -p 4318:4318 \
+  -p 16686:16686 \
+  jaegertracing/all-in-one:1.57
 ```
 
-Check status:
-```bash
-docker-compose ps
-```
+- **OTLP HTTP Traces Endpoint:** `http://localhost:4318/v1/traces`
+- **Jaeger Web UI:** `http://localhost:16686`
 
 ---
 
-## Using Jaeger UI
+## 2. Searching and Inspecting Spans
 
-1. Open **`http://localhost:16686`** in any web browser.
-2. Under **Service**, select your simulation service:
-   - `ns3-basic-p2p-simulation`
-   - `ns3-wifi-adhoc-simulation`
+1. Open **http://localhost:16686** in your browser.
+2. In the left navigation panel under **Service**, select your configured service name:
+   - `ns3-p2p-telemetry-demo` (from `otlp-basic-example`)
+   - `ns3-wifi-adhoc-simulation` (from `otlp-wifi-example`)
 3. Click **Find Traces**.
+4. Spans will display grouped by operation name (`packet_tx`, `packet_rx`, `packet_drop`).
+5. Click on any trace to inspect individual packet metadata attributes:
+   - `ns3.node_id`
+   - `ns3.packet_uid`
+   - `ns3.packet_size`
+   - `event.type`
+   - `ns3.drop_reason` (if applicable)
 
 ---
 
-## Interpreting Jaeger Visualizations
+## 3. Timestamp Anchoring Verification
 
-- **Interactive Scatter Plot:** Shows execution duration of each packet event against simulation time. Teal dots indicate successful packet transmissions and receptions (`packet_tx`, `packet_rx`).
-- **Error Highlights (Red Dots):** Red dots highlight packet drops (e.g. `BUFFER_OVERFLOW`, `WIFI_PHY_SNR_LOW`).
-- **Span Waterfall View:** Clicking on any trace opens a timeline showing exact microsecond execution durations, Node IDs, Packet UIDs, and attributes.
+Spans appear under the current wall-clock date/time of execution because `OtelClock` adds `Simulator::Now()` as a virtual offset to the wall-clock baseline captured during `OtelHelper::Install()`.

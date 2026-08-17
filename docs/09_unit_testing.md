@@ -1,112 +1,88 @@
-# 09. Automated Unit Testing Framework
+# 09. Automated Unit Testing
 
-## Overview
-
-`ns3-otlp` includes an automated unit test suite (`test/otlp-test-suite.cc`) integrated directly into ns-3's `test-runner`.
+This guide covers running unit tests for `ns3-otlp` using the ns-3 test runner.
 
 ---
 
-## Test Suite Implementation (`contrib/otlp/test/otlp-test-suite.cc`)
+## 1. Unit Test Architecture
 
-```cpp
-#include "ns3/test.h"
-#include "ns3/otlp-module.h"
-#include "ns3/simulator.h"
-#include "ns3/packet.h"
+The `otlp-test-suite` uses `InMemorySpanExporter` (`opentelemetry_exporter_in_memory`) from the OpenTelemetry C++ SDK:
 
-namespace ns3 {
-
-// 1. Clock Test Case
-class OtelClockTestCase : public TestCase
-{
-public:
-  OtelClockTestCase();
-  ~OtelClockTestCase() override = default;
-
-private:
-  void DoRun() override;
-};
-
-OtelClockTestCase::OtelClockTestCase()
-  : TestCase("Check OtelClock timestamp conversion with Simulator::Now()")
-{
-}
-
-void
-OtelClockTestCase::DoRun()
-{
-  Time simTime = NanoSeconds(100);
-  Simulator::Stop(simTime);
-  Simulator::Run();
-
-  auto otelTime = OtelClock::GetNow();
-  NS_TEST_ASSERT_MSG_EQ(Simulator::Now().GetNanoSeconds(), 100, "Simulator time should be 100 ns");
-  NS_TEST_ASSERT_MSG_GT(otelTime.time_since_epoch().count(), 0, "OtelClock timestamp should be > 0");
-
-  Simulator::Destroy();
-}
-
-// 2. Trace Sink Test Case
-class OtelTraceSinkTestCase : public TestCase
-{
-public:
-  OtelTraceSinkTestCase();
-  ~OtelTraceSinkTestCase() override = default;
-
-private:
-  void DoRun() override;
-};
-
-OtelTraceSinkTestCase::OtelTraceSinkTestCase()
-  : TestCase("Check OtelTraceSink packet event handling")
-{
-}
-
-void
-OtelTraceSinkTestCase::DoRun()
-{
-  OtelHelper otel("ns3-unit-test");
-  auto traceSink = otel.GetTraceSink();
-
-  Ptr<Packet> p = Create<Packet>(512);
-  NS_TEST_ASSERT_MSG_NE(p, nullptr, "Packet creation failed");
-
-  traceSink->TracePacketTx(p, 0);
-  traceSink->TracePacketRx(p, 1);
-  traceSink->TracePacketDrop(p, 0, "TEST_DROP");
-
-  Simulator::Destroy();
-}
-
-// 3. Test Suite Class
-class OtlpTestSuite : public TestSuite
-{
-public:
-  OtlpTestSuite();
-};
-
-OtlpTestSuite::OtlpTestSuite()
-  : TestSuite("otlp", TestSuite::Type::UNIT)
-{
-  AddTestCase(new OtelClockTestCase, TestCase::Duration::QUICK);
-  AddTestCase(new OtelTraceSinkTestCase, TestCase::Duration::QUICK);
-}
-
-static OtlpTestSuite g_otlpTestSuite;
-
-} // namespace ns3
-```
+- **Isolated Execution:** Tests run completely offline with zero network calls to localhost:4318.
+- **Fast CI Execution:** Prevents timeouts or connection stalls when running in headless CI environments.
+- **Exact Assertions:** Validates span names, attributes, `OtelClock` conversion accuracy, and error statuses directly in memory.
 
 ---
 
-## Executing Unit Tests
+## 2. Running Unit Tests
+
+Execute the OTLP test suite via `./ns3`:
 
 ```bash
 cd ~/ns-allinone-3.46.1/ns-3.46.1
-./ns3 run "test-runner --suite=otlp"
+./ns3 run "test-runner --suite=otlp --verbose"
 ```
 
-Expected output:
-```text
-PASS otlp 0.021 s
+### Expected Output
+
+```
+PASS: OtelTraceSinkTestCase
+PASS: OtelClockTestCase
+1 of 1 test suites passed (1 of 1 tests passed)
+```
+
+---
+
+## 3. Test Suite Implementation (`test/otlp-test-suite.cc`)
+
+```cpp
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Arun Santhosh R A <arunsanthosh.rashok@gmail.com>
+
+#include "ns3/log.h"
+#include "ns3/otlp-clock-provider.h"
+#include "ns3/otlp-trace-sink.h"
+#include "ns3/packet.h"
+#include "ns3/test.h"
+
+#include <opentelemetry/exporter/memory/in_memory_span_exporter.h>
+#include <opentelemetry/exporter/memory/in_memory_span_data.h>
+#include <opentelemetry/sdk/trace/simple_processor_factory.h>
+#include <opentelemetry/sdk/trace/tracer_provider_factory.h>
+#include <opentelemetry/trace/provider.h>
+
+using namespace ns3;
+using opentelemetry::exporter::memory::SpanData;
+
+class OtelTraceSinkTestCase : public TestCase
+{
+  public:
+    OtelTraceSinkTestCase() : TestCase("Test OtelTraceSink using InMemorySpanExporter") {}
+
+    void DoRun() override
+    {
+        const size_t maxSpans = 100;
+        auto data = std::make_shared<SpanData>(maxSpans);
+        auto exporter = opentelemetry::exporter::memory::InMemorySpanExporterFactory::Create(data);
+        auto processor = opentelemetry::sdk::trace::SimpleSpanProcessorFactory::Create(std::move(exporter));
+        auto sdkProvider = opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor));
+
+        opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider> provider(sdkProvider.release());
+        opentelemetry::trace::Provider::SetTracerProvider(provider);
+
+        Ptr<OtelTraceSink> sink = CreateObject<OtelTraceSink>();
+        sink->InitTracer();
+
+        Ptr<Packet> p = Create<Packet>(512);
+        sink->TracePacketTx(p, 1);
+        sink->TracePacketRx(p, 2);
+        sink->TracePacketDrop(p, 1, "BUFFER_FULL");
+
+        auto spans = data->GetSpans();
+        NS_TEST_ASSERT_MSG_EQ(spans.size(), 3, "Should have exported 3 spans");
+        NS_TEST_ASSERT_MSG_EQ(spans[0]->GetName(), "packet_tx", "Span 0 should be packet_tx");
+        NS_TEST_ASSERT_MSG_EQ(spans[1]->GetName(), "packet_rx", "Span 1 should be packet_rx");
+        NS_TEST_ASSERT_MSG_EQ(spans[2]->GetName(), "packet_drop", "Span 2 should be packet_drop");
+    }
+};
 ```

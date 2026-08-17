@@ -1,246 +1,182 @@
 # 07. Tutorials & Simulation Examples
 
-This section presents two complete simulation examples demonstrating how to use `ns3-otlp` in Point-to-Point and Wireless Ad-Hoc networks.
+This guide walks through using `ns3-otlp` in C++ simulation scripts, featuring the Point-to-Point UDP echo example and the 802.11b Wi-Fi ad-hoc example.
 
 ---
 
-## Example 1: Point-to-Point UDP Simulation (`otlp-basic-example.cc`)
+## Example 1: Point-to-Point UDP Echo (`examples/otlp-basic-example.cc`)
 
-### Code Overview (`contrib/otlp/examples/otlp-basic-example.cc`)
+### Code Overview
 
 ```cpp
-#include "ns3/core-module.h"
-#include "ns3/network-module.h"
-#include "ns3/internet-module.h"
-#include "ns3/point-to-point-module.h"
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Arun Santhosh R A <arunsanthosh.rashok@gmail.com>
+
 #include "ns3/applications-module.h"
+#include "ns3/core-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/network-module.h"
 #include "ns3/otlp-module.h"
+#include "ns3/point-to-point-module.h"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("OtelBasicExample");
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-  CommandLine cmd(__FILE__);
-  cmd.Parse(argc, argv);
+    CommandLine cmd(__FILE__);
+    cmd.Parse(argc, argv);
 
-  Time::SetResolution(Time::NS);
+    Time::SetResolution(Time::NS);
 
-  LogComponentEnable("OtelBasicExample", LOG_LEVEL_INFO);
-  NS_LOG_INFO("Initializing ns3-otlp simulation...");
+    // 1. Set up OtelHelper
+    OtelHelper otel;
+    otel.SetEndpoint("http://localhost:4318/v1/traces");
+    otel.SetServiceName("ns3-p2p-telemetry-demo");
+    otel.Install();
 
-  // 1. Initialize OpenTelemetry Exporter Helper
-  OtelHelper otel;
-  otel.SetServiceName("ns3-p2p-telemetry-demo");
+    // 2. Build topology
+    NodeContainer nodes;
+    nodes.Create(2);
 
-  // 2. Create nodes
-  NodeContainer nodes;
-  nodes.Create(2);
+    PointToPointHelper p2p;
+    p2p.SetDeviceAttribute("DataRate", StringValue("5Mbps"));
+    p2p.SetChannelAttribute("Delay", StringValue("2ms"));
+    NetDeviceContainer devices = p2p.Install(nodes);
 
-  // 3. Setup Point-to-Point Link
-  PointToPointHelper pointToPoint;
-  pointToPoint.SetDeviceAttribute("DataRate", StringValue("5Mbps"));
-  pointToPoint.SetChannelAttribute("Delay", StringValue("2ms"));
+    InternetStackHelper stack;
+    stack.Install(nodes);
 
-  NetDeviceContainer devices = pointToPoint.Install(nodes);
+    Ipv4AddressHelper address;
+    address.SetBase("10.1.1.0", "255.255.255.0");
+    Ipv4InterfaceContainer interfaces = address.Assign(devices);
 
-  // 4. Install Internet Stack
-  InternetStackHelper stack;
-  stack.Install(nodes);
+    // 3. Applications
+    uint16_t port = 9;
+    UdpEchoServerHelper echoServer(port);
+    ApplicationContainer serverApps = echoServer.Install(nodes.Get(1));
+    serverApps.Start(Seconds(1.0));
+    serverApps.Stop(Seconds(11.0));
 
-  Ipv4AddressHelper address;
-  address.SetBase("10.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer interfaces = address.Assign(devices);
+    UdpEchoClientHelper echoClient(interfaces.GetAddress(1), port);
+    echoClient.SetAttribute("MaxPackets", UintegerValue(10));
+    echoClient.SetAttribute("Interval", TimeValue(Seconds(1.0)));
+    echoClient.SetAttribute("PacketSize", UintegerValue(1024));
 
-  // 5. Install Applications
-  uint16_t port = 9;
-  UdpEchoServerHelper echoServer(port);
-  ApplicationContainer serverApps = echoServer.Install(nodes.Get(1));
-  serverApps.Start(Seconds(1.0));
-  serverApps.Stop(Seconds(10.0));
+    ApplicationContainer clientApps = echoClient.Install(nodes.Get(0));
+    clientApps.Start(Seconds(2.0));
+    clientApps.Stop(Seconds(11.0));
 
-  UdpEchoClientHelper echoClient(interfaces.GetAddress(1), port);
-  echoClient.SetAttribute("MaxPackets", UintegerValue(10));
-  echoClient.SetAttribute("Interval", TimeValue(Seconds(1.0)));
-  echoClient.SetAttribute("PacketSize", UintegerValue(1024));
+    // 4. Hook real trace sources
+    otel.EnableNodeTracing(nodes);
 
-  ApplicationContainer clientApps = echoClient.Install(nodes.Get(0));
-  clientApps.Start(Seconds(2.0));
-  clientApps.Stop(Seconds(10.0));
+    Simulator::Stop(Seconds(12.0));
+    Simulator::Run();
+    Simulator::Destroy();
 
-  otel.EnableNodeTracing(nodes);
-
-  // Emit a series of packet spans simulating full network activity
-  auto traceSink = otel.GetTraceSink();
-  auto metricSink = otel.GetMetricSink();
-
-  for (uint32_t pktId = 1; pktId <= 10; ++pktId)
-  {
-    Ptr<Packet> pkt = Create<Packet>(1024);
-    traceSink->TracePacketTx(pkt, 0);       // Node 0 transmits
-    metricSink->RecordThroughput(0, 1024.0);
-
-    if (pktId == 5)
-    {
-      // Simulate a packet drop at Node 0 for demonstration
-      traceSink->TracePacketDrop(pkt, 0, "BUFFER_OVERFLOW");
-      metricSink->RecordPacketDropCount(0, 1);
-    }
-    else
-    {
-      traceSink->TracePacketRx(pkt, 1);     // Node 1 receives
-      metricSink->RecordThroughput(1, 1024.0);
-    }
-  }
-
-  NS_LOG_INFO("Running simulation...");
-  Simulator::Stop(Seconds(10.0));
-  Simulator::Run();
-
-  Simulator::Destroy();
-  NS_LOG_INFO("Simulation finished successfully!");
-
-  return 0;
+    return 0;
 }
 ```
 
-### How to Run:
+### Running the Example
+
 ```bash
-cd ~/ns-allinone-3.46.1/ns-3.46.1
+# Ensure Jaeger is running
+docker run -d --name jaeger -p 4318:4318 -p 16686:16686 jaegertracing/all-in-one:1.57
+
+# Run simulation
 ./ns3 run otlp-basic-example
 ```
 
 ---
 
-## Example 2: 802.11b Wireless Ad-Hoc Simulation (`otlp-wifi-example.cc`)
+## Example 2: Wi-Fi Ad-hoc Simulation (`examples/otlp-wifi-example.cc`)
 
-### Code Overview (`contrib/otlp/examples/otlp-wifi-example.cc`)
+### Code Overview
 
 ```cpp
-#include "ns3/core-module.h"
-#include "ns3/network-module.h"
-#include "ns3/internet-module.h"
-#include "ns3/wifi-module.h"
-#include "ns3/mobility-module.h"
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Arun Santhosh R A <arunsanthosh.rashok@gmail.com>
+
 #include "ns3/applications-module.h"
+#include "ns3/core-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/mobility-module.h"
+#include "ns3/network-module.h"
 #include "ns3/otlp-module.h"
+#include "ns3/wifi-module.h"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("OtelWifiExample");
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-  CommandLine cmd(__FILE__);
-  cmd.Parse(argc, argv);
+    CommandLine cmd(__FILE__);
+    cmd.Parse(argc, argv);
 
-  Time::SetResolution(Time::NS);
+    Time::SetResolution(Time::NS);
 
-  LogComponentEnable("OtelWifiExample", LOG_LEVEL_INFO);
-  NS_LOG_INFO("Initializing ns3-otlp Wi-Fi simulation...");
+    OtelHelper otel;
+    otel.SetEndpoint("http://localhost:4318/v1/traces");
+    otel.SetServiceName("ns3-wifi-adhoc-simulation");
+    otel.Install();
 
-  // 1. Initialize OpenTelemetry Exporter Helper with custom Service Name
-  OtelHelper otel("ns3-wifi-adhoc-simulation");
+    NodeContainer wifiNodes;
+    wifiNodes.Create(3);
 
-  // 2. Create 3 Wireless Nodes
-  NodeContainer wifiNodes;
-  wifiNodes.Create(3);
+    YansWifiChannelHelper channel = YansWifiChannelHelper::Default();
+    YansWifiPhyHelper phy;
+    phy.SetChannel(channel.Create());
 
-  // 3. Configure Wi-Fi PHY and Channel
-  YansWifiChannelHelper channel = YansWifiChannelHelper::Default();
-  YansWifiPhyHelper phy;
-  phy.SetChannel(channel.Create());
+    WifiMacHelper mac;
+    WifiHelper wifi;
+    wifi.SetStandard(WIFI_STANDARD_80211b);
+    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager");
+    mac.SetType("ns3::AdhocWifiMac");
 
-  // 4. Configure Wi-Fi MAC (Ad-Hoc Mode)
-  WifiMacHelper mac;
-  WifiHelper wifi;
-  wifi.SetStandard(WIFI_STANDARD_80211b);
-  wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager");
+    NetDeviceContainer wifiDevices = wifi.Install(phy, mac, wifiNodes);
 
-  mac.SetType("ns3::AdhocWifiMac");
-  NetDeviceContainer wifiDevices = wifi.Install(phy, mac, wifiNodes);
+    MobilityHelper mobility;
+    Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator>();
+    positionAlloc->Add(Vector(0.0, 0.0, 0.0));
+    positionAlloc->Add(Vector(50.0, 0.0, 0.0));
+    positionAlloc->Add(Vector(100.0, 0.0, 0.0));
+    mobility.SetPositionAllocator(positionAlloc);
+    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+    mobility.Install(wifiNodes);
 
-  // 5. Configure Mobility (Nodes in a line: Node 0 at 0m, Node 1 at 50m, Node 2 at 100m)
-  MobilityHelper mobility;
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator>();
-  positionAlloc->Add(Vector(0.0, 0.0, 0.0));   // Node 0
-  positionAlloc->Add(Vector(50.0, 0.0, 0.0));  // Node 1
-  positionAlloc->Add(Vector(100.0, 0.0, 0.0)); // Node 2
-  mobility.SetPositionAllocator(positionAlloc);
-  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  mobility.Install(wifiNodes);
+    InternetStackHelper stack;
+    stack.Install(wifiNodes);
 
-  // 6. Install Internet Stack
-  InternetStackHelper stack;
-  stack.Install(wifiNodes);
+    Ipv4AddressHelper address;
+    address.SetBase("192.168.1.0", "255.255.255.0");
+    Ipv4InterfaceContainer interfaces = address.Assign(wifiDevices);
 
-  Ipv4AddressHelper address;
-  address.SetBase("192.168.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer interfaces = address.Assign(wifiDevices);
+    uint16_t port = 9;
+    UdpEchoServerHelper echoServer(port);
+    ApplicationContainer serverApps = echoServer.Install(wifiNodes.Get(2));
+    serverApps.Start(Seconds(1.0));
+    serverApps.Stop(Seconds(11.0));
 
-  // 7. Setup UDP Echo Server on Node 2
-  uint16_t port = 9;
-  UdpEchoServerHelper echoServer(port);
-  ApplicationContainer serverApps = echoServer.Install(wifiNodes.Get(2));
-  serverApps.Start(Seconds(1.0));
-  serverApps.Stop(Seconds(10.0));
+    UdpEchoClientHelper echoClient(interfaces.GetAddress(2), port);
+    echoClient.SetAttribute("MaxPackets", UintegerValue(15));
+    echoClient.SetAttribute("Interval", TimeValue(Seconds(0.5)));
+    echoClient.SetAttribute("PacketSize", UintegerValue(1024));
 
-  // 8. Setup UDP Echo Client on Node 0
-  UdpEchoClientHelper echoClient(interfaces.GetAddress(2), port);
-  echoClient.SetAttribute("MaxPackets", UintegerValue(15));
-  echoClient.SetAttribute("Interval", TimeValue(Seconds(0.5)));
-  echoClient.SetAttribute("PacketSize", UintegerValue(1024));
+    ApplicationContainer clientApps = echoClient.Install(wifiNodes.Get(0));
+    clientApps.Start(Seconds(2.0));
+    clientApps.Stop(Seconds(11.0));
 
-  ApplicationContainer clientApps = echoClient.Install(wifiNodes.Get(0));
-  clientApps.Start(Seconds(2.0));
-  clientApps.Stop(Seconds(10.0));
+    otel.EnableNodeTracing(wifiNodes);
 
-  otel.EnableNodeTracing(wifiNodes);
+    Simulator::Stop(Seconds(12.0));
+    Simulator::Run();
+    Simulator::Destroy();
 
-  // Emit Wi-Fi Telemetry Spans & Metrics
-  auto traceSink = otel.GetTraceSink();
-  auto metricSink = otel.GetMetricSink();
-
-  for (uint32_t pktId = 1; pktId <= 15; ++pktId)
-  {
-    Ptr<Packet> pkt = Create<Packet>(1024);
-
-    // Node 0 Wireless Transmission
-    traceSink->TracePacketTx(pkt, 0);
-    metricSink->RecordThroughput(0, 1024.0);
-
-    // Node 1 Hop Reception
-    traceSink->TracePacketRx(pkt, 1);
-    metricSink->RecordThroughput(1, 1024.0);
-
-    if (pktId == 7 || pktId == 12)
-    {
-      // Simulate Wi-Fi Interference / SNR Drop at Node 2
-      traceSink->TracePacketDrop(pkt, 2, "WIFI_PHY_SNR_LOW");
-      metricSink->RecordPacketDropCount(2, 1);
-    }
-    else
-    {
-      // Node 2 Final Reception
-      traceSink->TracePacketRx(pkt, 2);
-      metricSink->RecordThroughput(2, 1024.0);
-    }
-  }
-
-  NS_LOG_INFO("Running Wi-Fi simulation...");
-  Simulator::Stop(Seconds(10.0));
-  Simulator::Run();
-
-  Simulator::Destroy();
-  NS_LOG_INFO("Wi-Fi simulation finished successfully!");
-
-  return 0;
+    return 0;
 }
 ```
 
-### How to Run:
+### Running the Example
+
 ```bash
-cd ~/ns-allinone-3.46.1/ns-3.46.1
 ./ns3 run otlp-wifi-example
 ```
